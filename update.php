@@ -26,7 +26,7 @@ chdir($dir);
 
 out('');
 out('+'.str_repeat('-', 63).'+', 'bold', 'green');
-out('|'.str_pad('  SIMKA - SCRIPT UPDATE APLIKASI', 63).'|', 'bold', 'green');
+out('|'.str_pad('  SIPETAHU - SCRIPT UPDATE APLIKASI', 63).'|', 'bold', 'green');
 out('+'.str_repeat('-', 63).'+', 'bold', 'green');
 out('');
 info("Lokasi : {$dir}");

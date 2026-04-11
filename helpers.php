@@ -118,7 +118,7 @@ function step(int $n, string $title): void
 /**
  * Cetak box header bertema hijau (dipakai di awal setiap script).
  *
- * Contoh: header('SIMKA - SCRIPT SETUP PROJECT LARAVEL');
+ * Contoh: header('SIPETAHU - SCRIPT SETUP PROJECT LARAVEL');
  */
 function printHeader(string $title): void
 {

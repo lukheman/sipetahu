@@ -32,7 +32,7 @@ chdir($dir);
 
 out('');
 out('+'.str_repeat('-', 63).'+', 'bold', 'green');
-out('|'.str_pad('  SIMKA - SETUP APLIKASI', 63).'|', 'bold', 'green');
+out('|'.str_pad('  SIPETAHU - SETUP APLIKASI', 63).'|', 'bold', 'green');
 out('+'.str_repeat('-', 63).'+', 'bold', 'green');
 out('');
 info("Lokasi  : {$dir}");
@@ -120,7 +120,7 @@ out('');
 $db = [
     'HOST' => input('Host MySQL', '127.0.0.1'),
     'PORT' => input('Port MySQL', '3306'),
-    'DATABASE' => input('Nama Database', 'simka'),
+    'DATABASE' => input('Nama Database', 'sipetahu'),
     'USERNAME' => input('Username', 'root'),
     'PASSWORD' => input('Password', ''),
 ];
@@ -181,7 +181,7 @@ foreach (['config', 'view', 'route'] as $cache) {
 
 out('');
 out('+'.str_repeat('-', 63).'+', 'bold', 'green');
-out('|'.str_pad(' SETUP APLIKASI SIMKA BERHASIL DISELESAIKAN!', 63).'|', 'bold', 'green');
+out('|'.str_pad(' SETUP APLIKASI SIPETAHU BERHASIL DISELESAIKAN!', 63).'|', 'bold', 'green');
 out('+'.str_repeat('-', 63).'+', 'bold', 'green');
 out('');
 info('Jalankan server dengan: php artisan serve');

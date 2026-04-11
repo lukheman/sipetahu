@@ -25,7 +25,7 @@ $url = 'http://localhost:8000';
 
 out('');
 out('+'.str_repeat('-', 63).'+', 'bold', 'green');
-out('|'.str_pad('  SIMKA - SERVER', 63).'|', 'bold', 'green');
+out('|'.str_pad('  SIPETAHU - SERVER', 63).'|', 'bold', 'green');
 out('+'.str_repeat('-', 63).'+', 'bold', 'green');
 out('');
 info('Lokasi Project : '.__DIR__);
