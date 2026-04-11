@@ -10,8 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('avatar')->nullable()->after('email');
+        Schema::create('produk', function (Blueprint $table) {
+            $table->id('id_produk');
+            $table->string('nama_produk');
+            $table->decimal('harga', 12, 2);
+            $table->text('deskripsi')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -20,8 +24,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('avatar');
-        });
+        Schema::dropIfExists('produk');
     }
 };

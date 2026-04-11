@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Role;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,12 +15,26 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'password' => 'password123'
-        ]);
+      User::firstOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('password123'),
+                'role' => Role::ADMIN
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'pemilik@gmail.com'],
+            [
+                'name' => 'Pemilik',
+                'password' => Hash::make('password123'),
+                'role' => Role::PEMILIK
+            ]
+        );
+
+        $this->call(DataPenjualanSeeder::class);
+
     }
 }

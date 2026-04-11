@@ -1,32 +1,45 @@
 <div class="login-container">
     <div class="login-card">
-        <!-- Brand Logo -->
+
+        {{-- Brand Logo --}}
         <div class="brand-logo">
             <div class="icon-wrapper">
-                <i class="fas fa-layer-group"></i>
+                <i class="fas fa-chart-line"></i>
             </div>
-            <h1>Welcome Back</h1>
-            <p>Sign in to continue to AdminPro</p>
+            <h1>Selamat Datang</h1>
+            <p>Masuk ke sistem prediksi penjualan SITAHU</p>
         </div>
 
-        <!-- Login Form -->
+        {{-- Login Form --}}
         <form wire:submit="submit">
-            <!-- Email Field -->
+
+            {{-- Email --}}
             <div class="form-floating position-relative">
                 <i class="fas fa-envelope input-icon"></i>
-                <input type="email" wire:model="email" class="form-control @error('email') is-invalid @enderror"
-                    id="email" placeholder="Email Address" autofocus>
-                <label for="email">Email Address</label>
+                <input
+                    type="email"
+                    wire:model="email"
+                    class="form-control @error('email') is-invalid @enderror"
+                    id="email"
+                    placeholder="Alamat Email"
+                    autofocus
+                >
+                <label for="email">Alamat Email</label>
                 @error('email')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            <!-- Password Field -->
+            {{-- Password --}}
             <div class="form-floating position-relative">
                 <i class="fas fa-lock input-icon"></i>
-                <input type="password" wire:model="password"
-                    class="form-control @error('password') is-invalid @enderror" id="password" placeholder="Password">
+                <input
+                    type="password"
+                    wire:model="password"
+                    class="form-control @error('password') is-invalid @enderror"
+                    id="password"
+                    placeholder="Password"
+                >
                 <label for="password">Password</label>
                 <button type="button" class="password-toggle" onclick="togglePassword()">
                     <i class="fas fa-eye" id="toggleIcon"></i>
@@ -35,47 +48,57 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
-            <script>
-                function togglePassword() {
-                    const input = document.getElementById('password');
-                    const icon = document.getElementById('toggleIcon');
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        icon.classList.replace('fa-eye', 'fa-eye-slash');
-                    } else {
-                        input.type = 'password';
-                        icon.classList.replace('fa-eye-slash', 'fa-eye');
-                    }
-                }
-            </script>
 
-            <!-- Remember Me & Forgot Password -->
+            {{-- Remember & Forgot --}}
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="form-check mb-0">
                     <input class="form-check-input" type="checkbox" wire:model="remember" id="remember">
-                    <label class="form-check-label" for="remember">Remember me</label>
+                    <label class="form-check-label" for="remember">Ingat saya</label>
                 </div>
-                <a href="#" class="forgot-password">Forgot Password?</a>
+                <a href="#" class="forgot-password">Lupa Password?</a>
             </div>
 
-            <!-- Login Button -->
-            <button type="submit" class="btn btn-login" wire:loading.attr="disabled">
-                <span wire:loading.remove>Sign In <i class="fas fa-arrow-right"></i></span>
+            {{-- Submit --}}
+            <button type="submit" class="btn-login" wire:loading.attr="disabled">
+                <span wire:loading.remove>
+                    Masuk <i class="fas fa-arrow-right"></i>
+                </span>
                 <span wire:loading>
-                    <i class="fas fa-spinner fa-spin me-2"></i> Signing in...
+                    <i class="fas fa-spinner fa-spin me-2"></i> Memproses...
                 </span>
             </button>
+
         </form>
 
-        <!-- Divider -->
-        <div class="divider">
-            <span>or continue with</span>
+        {{-- Divider --}}
+        <div class="divider"><span>atau</span></div>
+
+        {{-- Back to home --}}
+        <!-- <div class="signup-link"> -->
+        <!--     Belum punya akun? <a href="{{ route('register') }}">Daftar Sekarang</a> -->
+        <!-- </div> -->
+        <div class="signup-link mt-2">
+            <a href="/" style="color: var(--text-mid); font-weight:400;">
+                <i class="fas fa-arrow-left" style="font-size:0.75rem;"></i>
+                Kembali ke Beranda
+            </a>
         </div>
 
-
-        <!-- Sign Up Link -->
-        <div class="signup-link">
-            Don't have an account? <a href="{{ route('register') }}">Create Account</a>
-        </div>
     </div>
 </div>
+
+<x-slot:scripts>
+<script>
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const icon  = document.getElementById('toggleIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+</script>
+</x-slot:scripts>

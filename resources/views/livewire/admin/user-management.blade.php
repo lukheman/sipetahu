@@ -1,9 +1,9 @@
 <div>
     {{-- Page Header --}}
-    <x-page-header title="User Management" subtitle="Manage all users in the system">
+    <x-page-header title="Manajemen Pengguna">
         <x-slot:actions>
             <x-button variant="primary" icon="fas fa-plus" wire:click="openCreateModal">
-                Add User
+                Tambah Pengguna
             </x-button>
         </x-slot:actions>
     </x-page-header>
@@ -42,6 +42,7 @@
                     <tr>
                         <th>User</th>
                         <th>Email</th>
+                        <th>Role</th>
                         <th>Created</th>
                         <th>Status</th>
                         <th style="width: 120px;">Actions</th>
@@ -49,17 +50,26 @@
                 </thead>
                 <tbody>
                     @forelse ($users as $user)
-                        <tr wire:key="user-{{ $user->id }}">
+                        <tr wire:key="user-{{ $user->id_user }}">
                             <td>
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="user-avatar">{{ $user->initials() }}</div>
                                     <div>
                                         <div class="fw-semibold" style="color: var(--text-primary);">{{ $user->name }}</div>
-                                        <small class="text-muted">ID: {{ $user->id }}</small>
+                                        <small class="text-muted">ID: {{ $user->id_user }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td style="color: var(--text-secondary);">{{ $user->email }}</td>
+                            <td>
+                                @if($user->role === 'admin')
+                                    <x-badge variant="danger" icon="fas fa-user-shield">Administrator</x-badge>
+                                @elseif($user->role === 'pemilik')
+                                    <x-badge variant="primary" icon="fas fa-user-tie">Pemilik</x-badge>
+                                @else
+                                    <x-badge variant="secondary">{{ ucfirst($user->role->value) }}</x-badge>
+                                @endif
+                            </td>
                             <td class="text-muted">{{ $user->created_at->format('M d, Y') }}</td>
                             <td>
                                 @if($user->email_verified_at)
@@ -70,12 +80,12 @@
                             </td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <button class="action-btn action-btn-edit" wire:click="openEditModal({{ $user->id }})"
-                                        title="Edit user">
+                                    <button class="action-btn action-btn-edit"
+                                        wire:click="openEditModal({{ $user->id_user }})" title="Edit user">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="action-btn action-btn-delete" wire:click="confirmDelete({{ $user->id }})"
-                                        title="Delete user">
+                                    <button class="action-btn action-btn-delete"
+                                        wire:click="confirmDelete({{ $user->id_user }})" title="Delete user">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
@@ -83,7 +93,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4">
+                            <td colspan="6" class="text-center py-4">
                                 <div class="text-muted">
                                     <i class="fas fa-users mb-2" style="font-size: 2rem;"></i>
                                     <p class="mb-0">No users found</p>
@@ -137,6 +147,18 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="role" class="form-label">Role <span style="color: var(--danger-color);">*</span></label>
+                        <select class="form-select @error('role') is-invalid @enderror" id="role" wire:model="role">
+                            <option value="">Select Role</option>
+                            <option value="admin">Administrator</option>
+                            <option value="pemilik">Pemilik</option>
+                        </select>
+                        @error('role')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
                         <label for="password" class="form-label">
                             Password
                             @if (!$editingUserId)
@@ -173,15 +195,9 @@
     @endif
 
     {{-- Delete Confirmation Modal --}}
-    <x-confirm-modal
-        :show="$showDeleteModal"
-        title="Confirm Delete"
-        message="Are you sure you want to delete this user? This action cannot be undone."
-        on-confirm="deleteUser"
-        on-cancel="cancelDelete"
-        variant="danger"
-        icon="fas fa-exclamation-triangle"
-    >
+    <x-confirm-modal :show="$showDeleteModal" title="Confirm Delete"
+        message="Are you sure you want to delete this user? This action cannot be undone." on-confirm="deleteUser"
+        on-cancel="cancelDelete" variant="danger" icon="fas fa-exclamation-triangle">
         <x-slot:confirmButton>
             <i class="fas fa-trash-alt me-2"></i>Delete User
         </x-slot:confirmButton>

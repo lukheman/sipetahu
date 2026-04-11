@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
+use App\Enums\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
@@ -11,7 +12,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Title('User Management')]
+#[Title('Manajemen Pengguna')]
 class UserManagement extends Component
 {
     use WithPagination;
@@ -25,6 +26,7 @@ class UserManagement extends Component
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
+    public string $role = '';
 
     // State
     public ?int $editingUserId = null;
@@ -37,6 +39,7 @@ class UserManagement extends Component
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
+            'role' => ['required', 'string', 'in:admin,pemilik'],
         ];
 
         if ($this->editingUserId) {
@@ -70,6 +73,7 @@ class UserManagement extends Component
         $this->editingUserId = $userId;
         $this->name = $user->name;
         $this->email = $user->email;
+        $this->role = $user->role;
         $this->password = '';
         $this->password_confirmation = '';
         $this->showModal = true;
@@ -83,6 +87,7 @@ class UserManagement extends Component
             $user = User::findOrFail($this->editingUserId);
             $user->name = $validated['name'];
             $user->email = $validated['email'];
+            $user->role = $validated['role'];
 
             if (!empty($this->password)) {
                 $user->password = Hash::make($this->password);
@@ -95,6 +100,7 @@ class UserManagement extends Component
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
+                'role' => $validated['role'],
             ]);
             session()->flash('success', 'User created successfully.');
         }
@@ -138,6 +144,7 @@ class UserManagement extends Component
         $this->email = '';
         $this->password = '';
         $this->password_confirmation = '';
+        $this->role = '';
         $this->editingUserId = null;
     }
 

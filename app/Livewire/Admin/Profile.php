@@ -11,7 +11,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Title('Profile - AdminPro')]
+#[Title('Profile - SITAHU')]
 class Profile extends Component
 {
     use WithFileUploads;
