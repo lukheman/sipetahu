@@ -10,7 +10,7 @@ use Livewire\Attributes\Rule;
 use Livewire\Component;
 
 #[Layout('layouts.guest')]
-#[Title('Masuk - SIPETAHU')]
+#[Title('Masuk - ')]
 class Login extends Component
 {
     #[Rule(['required', 'email'])]

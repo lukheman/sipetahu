@@ -8,8 +8,8 @@
  */
 
 define('MIN_PHP_VERSION', '8.2.0');
-define('REPO_URL', 'https://github.com/lukheman/sipetahu.git');
-define('REPO_DIR', 'sipetahu');
+define('REPO_URL', 'https://github.com/lukheman/.git');
+define('REPO_DIR', '');
 
 // ============================================================
 //  Helper: Deteksi OS

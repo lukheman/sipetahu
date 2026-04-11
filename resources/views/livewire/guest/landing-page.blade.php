@@ -149,7 +149,7 @@
                 <span class="sec-eyebrow">Tentang Sistem</span>
                 <h2 class="sec-title">Solusi Cerdas<br>untuk UMKM Tahu</h2>
                 <p class="sec-body">
-                    SIPETAHU dirancang khusus untuk <strong>Pabrik Tahu Tempe Sumber Urip</strong>. Dengan mengolah data historis penjualan menjadi prediksi masa depan yang akurat, kami membantu pemilik usaha tahu mengoptimalkan produksi dan menekan biaya.
+                     dirancang khusus untuk <strong>Pabrik Tahu Tempe Sumber Urip</strong>. Dengan mengolah data historis penjualan menjadi prediksi masa depan yang akurat, kami membantu pemilik usaha tahu mengoptimalkan produksi dan menekan biaya.
                 </p>
                 <a href="{{ route('login') }}" class="btn-sec-cta">
                     Akses Sistem <i class="fas fa-arrow-right"></i>
