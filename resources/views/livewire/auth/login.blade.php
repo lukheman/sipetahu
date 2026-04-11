@@ -7,7 +7,7 @@
                 <i class="fas fa-chart-line"></i>
             </div>
             <h1>Selamat Datang</h1>
-            <p>Masuk ke sistem prediksi penjualan SITAHU</p>
+            <p>Masuk ke sistem prediksi penjualan SIPETAHU</p>
         </div>
 
         {{-- Login Form --}}

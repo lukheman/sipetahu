@@ -1,6 +1,6 @@
 @props([
     'title' => 'Modern Admin Dashboard',
-    'brandName' => 'SITAHU',
+    'brandName' => 'SIPETAHU',
     'brandIcon' => 'fas fa-layer-group'
 ])
 

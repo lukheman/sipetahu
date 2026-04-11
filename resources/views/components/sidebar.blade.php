@@ -1,5 +1,5 @@
 @props([
-    'brandName' => 'SITAHU',
+    'brandName' => 'SIPETAHU',
     'brandIcon' => 'fas fa-layer-group'
 ])
 

@@ -7,7 +7,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.guest')]
-#[Title('SITAHU - Sistem Prediksi Penjualan Produk Tahu')]
+#[Title('SIPETAHU - Sistem Prediksi Penjualan Produk Tahu')]
 class LandingPage extends Component
 {
     public function render()

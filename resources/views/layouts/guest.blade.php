@@ -1,5 +1,5 @@
 @props([
-    'title' => 'SITAHU - Sistem Prediksi Penjualan Tahu',
+    'title' => 'SIPETAHU - Sistem Prediksi Penjualan Tahu',
     'description' => 'Sistem Cerdas untuk Membantu Pabrik Tahu Tempe Sumber Urip Menganalisis dan Memprediksi Penjualan Menggunakan Metode Weighted Moving Average.',
     'type' => 'guest',
 ])
@@ -788,7 +788,7 @@
                 <div class="brand-icon-box">
                     <i class="fas fa-chart-line"></i>
                 </div>
-                <span class="brand-wordmark">SITAHU</span>
+                <span class="brand-wordmark">SIPETAHU</span>
             </a>
 
             {{-- Nav links --}}
@@ -842,7 +842,7 @@
                             <div class="brand-icon-box">
                                 <i class="fas fa-chart-line"></i>
                             </div>
-                            <span class="brand-wordmark">SITAHU</span>
+                            <span class="brand-wordmark">SIPETAHU</span>
                         </a>
                         <p>Sistem cerdas prediksi penjualan produk tahu menggunakan metode Weighted Moving Average (WMA) untuk UMKM Indonesia.</p>
                         <span class="footer-pill">WMA Powered</span>
@@ -870,7 +870,7 @@
                 </div>
 
                 <div class="footer-bottom">
-                    <p>&copy; {{ date('Y') }} SITAHU. All rights reserved.</p>
+                    <p>&copy; {{ date('Y') }} SIPETAHU. All rights reserved.</p>
                     <p>Dibuat untuk UMKM Indonesia 🇮🇩</p>
                 </div>
             </div>
