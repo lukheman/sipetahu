@@ -3,14 +3,14 @@
         <x-slot name="actions">
             <div class="d-flex gap-2">
                 @if (auth()->user()->role === \App\Enums\Role::ADMIN)
-                    <button wire:click="kalkulasiWMA" class="btn btn-warning shadow-sm" wire:loading.attr="disabled">
+                    <x-button variant="warning" wire:click="kalkulasiWMA" wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="kalkulasiWMA">
                             <i class="fas fa-calculator me-2"></i>Kalkulasi WMA
                         </span>
                         <span wire:loading wire:target="kalkulasiWMA">
                             <i class="fas fa-spinner fa-spin me-2"></i>Menghitung...
                         </span>
-                    </button>
+                    </x-button>
                 @endif
             </div>
         </x-slot>
