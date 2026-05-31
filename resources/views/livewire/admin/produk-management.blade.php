@@ -69,14 +69,14 @@
                             <td class="text-muted">{{ \Illuminate\Support\Str::limit($record->deskripsi ?? '-', 50) }}</td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <button class="action-btn action-btn-edit"
+                                    <x-button
                                         wire:click="openEditModal({{ $record->id_produk }})" title="Edit data">
                                         <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn action-btn-delete"
+                                    </x-button>
+                                    <x-button variant="danger"
                                         wire:click="confirmDelete({{ $record->id_produk }})" title="Hapus data">
                                         <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                    </x-button>
                                 </div>
                             </td>
                         </tr>

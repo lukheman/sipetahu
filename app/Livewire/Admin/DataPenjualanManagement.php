@@ -26,6 +26,8 @@ class DataPenjualanManagement extends Component
 
     // Form fields
     public string $tanggal = '';
+    public string $jenis_pembeli = 'langsung';
+    public ?int $id_distributor = null;
     public int $produksi_tahu_kecil = 0;
     public int $produksi_tahu_besar = 0;
     public int $total_produksi = 0;
@@ -65,6 +67,8 @@ class DataPenjualanManagement extends Component
     {
         return [
             'tanggal' => ['required', 'date'],
+            'jenis_pembeli' => ['required', 'in:distributor,langsung'],
+            'id_distributor' => ['nullable', 'exists:distributor,id_distributor', 'required_if:jenis_pembeli,distributor'],
             'produksi_tahu_kecil' => ['required', 'integer', 'min:0'],
             'produksi_tahu_besar' => ['required', 'integer', 'min:0'],
             'total_produksi' => ['required', 'integer', 'min:0'],
@@ -103,6 +107,8 @@ class DataPenjualanManagement extends Component
         $record = DataPenjualan::findOrFail($id);
         $this->editingId = $id;
         $this->tanggal = $record->tanggal;
+        $this->jenis_pembeli = $record->jenis_pembeli;
+        $this->id_distributor = $record->id_distributor;
         $this->produksi_tahu_kecil = $record->produksi_tahu_kecil;
         $this->produksi_tahu_besar = $record->produksi_tahu_besar;
         $this->total_produksi = $record->total_produksi;
@@ -117,6 +123,10 @@ class DataPenjualanManagement extends Component
     public function save(): void
     {
         $validated = $this->validate();
+
+        if ($validated['jenis_pembeli'] === 'langsung') {
+            $validated['id_distributor'] = null;
+        }
 
         if ($this->editingId) {
             $record = DataPenjualan::findOrFail($this->editingId);
@@ -163,6 +173,8 @@ class DataPenjualanManagement extends Component
     protected function resetForm(): void
     {
         $this->tanggal = now()->format('Y-m-d');
+        $this->jenis_pembeli = 'langsung';
+        $this->id_distributor = null;
         $this->produksi_tahu_kecil = 0;
         $this->produksi_tahu_besar = 0;
         $this->total_produksi = 0;
@@ -228,6 +240,7 @@ class DataPenjualanManagement extends Component
     public function render()
     {
         $records = DataPenjualan::query()
+            ->with('distributor')
             ->when(
                 $this->search,
                 fn($q) =>
@@ -236,8 +249,11 @@ class DataPenjualanManagement extends Component
             ->orderBy('tanggal', 'desc')
             ->paginate(10);
 
+        $distributors = \App\Models\Distributor::orderBy('nama_distributor')->get();
+
         return view('livewire.admin.data-penjualan-management', [
             'records' => $records,
+            'distributors' => $distributors,
         ]);
     }
 }

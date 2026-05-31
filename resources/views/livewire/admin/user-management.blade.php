@@ -40,12 +40,10 @@
             <table class="table table-modern">
                 <thead>
                     <tr>
-                        <th>User</th>
+                        <th>Pengguna</th>
                         <th>Email</th>
                         <th>Role</th>
-                        <th>Created</th>
-                        <th>Status</th>
-                        <th style="width: 120px;">Actions</th>
+                        <th style="width: 120px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,24 +68,16 @@
                                     <x-badge variant="secondary">{{ ucfirst($user->role->value) }}</x-badge>
                                 @endif
                             </td>
-                            <td class="text-muted">{{ $user->created_at->format('M d, Y') }}</td>
-                            <td>
-                                @if($user->email_verified_at)
-                                    <x-badge variant="success" icon="fas fa-check-circle">Verified</x-badge>
-                                @else
-                                    <x-badge variant="warning" icon="fas fa-clock">Pending</x-badge>
-                                @endif
-                            </td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <button class="action-btn action-btn-edit"
+                                    <x-button
                                         wire:click="openEditModal({{ $user->id_user }})" title="Edit user">
                                         <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn action-btn-delete"
+                                    </x-button>
+                                    <x-button variant="danger"
                                         wire:click="confirmDelete({{ $user->id_user }})" title="Delete user">
                                         <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                    </x-button>
                                 </div>
                             </td>
                         </tr>
@@ -119,7 +109,7 @@
             <div class="modal-content-custom" wire:click.stop>
                 <div class="modal-header-custom">
                     <h5 class="modal-title-custom">
-                        {{ $editingUserId ? 'Edit User' : 'Create New User' }}
+                        {{ $editingUserId ? 'Edit Pengguna' : 'Tambahkan Pengguna Baru' }}
                     </h5>
                     <button type="button" class="modal-close-btn" wire:click="closeModal">
                         <i class="fas fa-times"></i>
@@ -183,10 +173,10 @@
 
                     <div class="d-flex justify-content-end gap-2">
                         <x-button type="button" variant="outline" wire:click="closeModal">
-                            Cancel
+                            Batal
                         </x-button>
                         <x-button type="submit" variant="primary">
-                            {{ $editingUserId ? 'Update User' : 'Create User' }}
+                            {{ $editingUserId ? 'Perbarui' : 'Tambahkan' }}
                         </x-button>
                     </div>
                 </form>

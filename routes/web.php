@@ -25,6 +25,7 @@ Route::get('/register', Register::class)->name('register');
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/data-penjualan', DataPenjualanManagement::class)->name('admin.data-penjualan');
+    Route::get('/distributor', \App\Livewire\Admin\DistributorManagement::class)->name('admin.distributor');
     Route::get('/laporan-penjualan', LaporanPenjualan::class)->name('admin.laporan-penjualan');
     Route::get('/laporan-wma', LaporanWma::class)->name('admin.laporan-wma');
     Route::get('/prediksi-tahu', PrediksiTahu::class)->name('admin.prediksi-tahu');

@@ -12,6 +12,8 @@ class DataPenjualan extends Model
 
     protected $fillable = [
         'tanggal',
+        'jenis_pembeli',
+        'id_distributor',
         'produksi_tahu_kecil',
         'produksi_tahu_besar',
         'total_produksi',
@@ -21,6 +23,11 @@ class DataPenjualan extends Model
         'tahu_kembali_kecil',
         'tahu_kembali_besar'
     ];
+
+    public function distributor()
+    {
+        return $this->belongsTo(Distributor::class, 'id_distributor', 'id_distributor');
+    }
 
     public function hasilPrediksi(): HasOne
     {

@@ -73,7 +73,7 @@ class UserManagement extends Component
         $this->editingUserId = $userId;
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->role = $user->role;
+        $this->role = $user->role->value;
         $this->password = '';
         $this->password_confirmation = '';
         $this->showModal = true;

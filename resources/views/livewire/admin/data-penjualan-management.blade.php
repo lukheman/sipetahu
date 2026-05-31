@@ -47,10 +47,11 @@
                 <thead>
                     <tr>
                         <th>Tanggal</th>
-                        <th>Prod T.Kecil</th>
-                        <th>Prod T.Besar</th>
-                        <th>Penj T.Kecil</th>
-                        <th>Penj T.Besar</th>
+                        <th>Pembeli</th>
+                        <th>Produksi Tahu Kecil</th>
+                        <th>Produksi Tahu Besar</th>
+                        <th>Penjualan Tahu Kecil</th>
+                        <th>Penjualan Tahu Besar</th>
                         <th style="width: 120px;">Aksi</th>
                     </tr>
                 </thead>
@@ -60,26 +61,33 @@
                             <td>
                                 {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
                             </td>
+                            <td>
+                                @if($record->jenis_pembeli === 'distributor')
+                                    <span class="badge bg-primary">Distributor: {{ $record->distributor?->nama_distributor }}</span>
+                                @else
+                                    <span class="badge bg-secondary">Langsung</span>
+                                @endif
+                            </td>
                             <td>{{ number_format($record->produksi_tahu_kecil, 0, ',', '.') }}</td>
                             <td>{{ number_format($record->produksi_tahu_besar, 0, ',', '.') }}</td>
                             <td>{{ number_format($record->penjualan_tahu_kecil, 0, ',', '.') }}</td>
                             <td>{{ number_format($record->penjualan_tahu_besar, 0, ',', '.') }}</td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <button class="action-btn action-btn-edit"
+                                    <x-button 
                                         wire:click="openEditModal({{ $record->id_data_penjualan }})" title="Edit data">
                                         <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn action-btn-delete"
+                                    </x-button>
+                                    <x-button variant="danger"
                                         wire:click="confirmDelete({{ $record->id_data_penjualan }})" title="Hapus data">
                                         <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                    </x-button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4">
+                            <td colspan="7" class="text-center py-4">
                                 <div class="text-muted">
                                     <i class="fas fa-box-open mb-2" style="font-size: 2rem;"></i>
                                     <p class="mb-0">Tidak ada data ditemukan</p>
@@ -114,6 +122,34 @@
 
                 <form wire:submit="save">
                     <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Jenis Pembeli <span style="color: var(--danger-color);">*</span></label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="jenis_pembeli" id="pembeli_langsung" value="langsung" wire:model.live="jenis_pembeli">
+                                    <label class="form-check-label" for="pembeli_langsung">Datang Langsung (Pembeli Biasa)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="jenis_pembeli" id="pembeli_distributor" value="distributor" wire:model.live="jenis_pembeli">
+                                    <label class="form-check-label" for="pembeli_distributor">Distributor</label>
+                                </div>
+                            </div>
+                            @error('jenis_pembeli') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                        </div>
+
+                        @if($jenis_pembeli === 'distributor')
+                            <div class="col-md-12 mb-3">
+                                <label for="id_distributor" class="form-label">Pilih Distributor <span style="color: var(--danger-color);">*</span></label>
+                                <select class="form-select @error('id_distributor') is-invalid @enderror" id="id_distributor" wire:model="id_distributor">
+                                    <option value="">-- Pilih Distributor --</option>
+                                    @foreach($distributors as $dist)
+                                        <option value="{{ $dist->id_distributor }}">{{ $dist->nama_distributor }}</option>
+                                    @endforeach
+                                </select>
+                                @error('id_distributor') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        @endif
+
                         <div class="col-md-12 mb-3">
                             <label for="tanggal" class="form-label">Tanggal <span style="color: var(--danger-color);">*</span></label>
                             <input type="date" class="form-control @error('tanggal') is-invalid @enderror" id="tanggal" wire:model="tanggal">

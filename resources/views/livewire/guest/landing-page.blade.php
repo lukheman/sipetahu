@@ -454,21 +454,12 @@
 .hero-bg-img {
     position: absolute;
     inset: 0;
-    background:
+    background-image:
         linear-gradient(105deg, rgba(13,13,13,0.92) 0%, rgba(13,13,13,0.7) 50%, rgba(13,13,13,0.4) 100%),
-        /* Fallback gradient that looks like a photo */
-        linear-gradient(135deg, #1a2a1a 0%, #0a1f0a 40%, #152215 70%, #0d1a0d 100%);
+        url('/images/bg-tahu.png');
     background-size: cover;
     background-position: center right;
 }
-
-/* Uncomment below and add your own photo URL:
-.hero-bg-img {
-    background-image:
-        linear-gradient(105deg, rgba(13,13,13,0.88) 0%, rgba(13,13,13,0.6) 50%, rgba(13,13,13,0.3) 100%),
-        url('/path/to/your-tahu-photo.jpg');
-}
-*/
 
 .hero-overlay {
     position: absolute;
