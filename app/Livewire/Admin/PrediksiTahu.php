@@ -23,7 +23,7 @@ class PrediksiTahu extends Component
         $wmaService->generatePrediksiTahu();
 
         session()->flash('success', 'Kalkulasi prediksi WMA berhasil dijalankan!');
-        
+
         $this->dispatch('wma-calculated');
     }
 
@@ -72,9 +72,9 @@ class PrediksiTahu extends Component
             ];
         }
 
-        $avgMAD = \App\Models\HasilPrediksi::has('dataPenjualan')->avg('mad') ?? 0;
-        $avgMSE = \App\Models\HasilPrediksi::has('dataPenjualan')->avg('mse') ?? 0;
-        $avgMAPE = \App\Models\HasilPrediksi::has('dataPenjualan')->avg('mape') ?? 0;
+        $avgMAD = \App\Models\HasilPrediksi::query()->has('dataPenjualan')->avg('mad') ?? 0;
+        $avgMSE = \App\Models\HasilPrediksi::query()->has('dataPenjualan')->avg('mse') ?? 0;
+        $avgMAPE = \App\Models\HasilPrediksi::query()->has('dataPenjualan')->avg('mape') ?? 0;
 
         $bulanOptions = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
