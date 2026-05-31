@@ -23,6 +23,11 @@
                         <td class="text-muted fst-italic">Belum ada data</td>
                         <td>
                             <span class="badge bg-warning text-dark px-2 py-1 fs-6 shadow-sm">{{ number_format($nextPrediction['wma'], 2, ',', '.') }}</span>
+                            @if(!empty($nextPrediction['detail_wma']))
+                                <div class="mt-1" style="font-size: 0.75rem; color: var(--text-muted);">
+                                    Rumus: {{ $nextPrediction['detail_wma'] }}
+                                </div>
+                            @endif
                         </td>
                         <td class="text-muted">-</td>
                         <td class="text-muted">-</td>
@@ -40,6 +45,11 @@
                         <td>
                             @if($record->hasilPrediksi)
                                 <span class="badge bg-warning text-dark px-2 py-1 fs-6">{{ number_format($record->hasilPrediksi->wma, 2, ',', '.') }}</span>
+                                @if($record->detail_wma)
+                                    <div class="mt-1" style="font-size: 0.75rem; color: var(--text-muted);">
+                                        Rumus: {{ $record->detail_wma }}
+                                    </div>
+                                @endif
                             @else
                                 <span class="text-muted">-</span>
                             @endif

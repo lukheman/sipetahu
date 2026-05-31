@@ -55,10 +55,20 @@ class PrediksiTahu extends Component
 
             $wmaNext = $wmaService->calculateWMA($ascRecords, count($ascRecords));
 
+            $count = count($ascRecords);
+            $detailStr = null;
+            if ($count >= 3) {
+                $d3 = number_format($ascRecords[$count-3]['total_penjualan'], 2, ',', '.');
+                $d2 = number_format($ascRecords[$count-2]['total_penjualan'], 2, ',', '.');
+                $d1 = number_format($ascRecords[$count-1]['total_penjualan'], 2, ',', '.');
+                $detailStr = "(( {$d1} × 3 ) + ( {$d2} × 2 ) + ( {$d3} × 1 )) / 6";
+            }
+
             $nextPrediction = [
                 'bulan' => $nextBulan,
                 'tahun' => $nextTahun,
-                'wma' => $wmaNext
+                'wma' => $wmaNext,
+                'detail_wma' => $detailStr
             ];
         }
 
