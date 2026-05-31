@@ -11,25 +11,29 @@ class DataPenjualanImport implements ToModel, WithHeadingRow, WithValidation
 {
     public function model(array $row)
     {
-        // the index matches the slugified heading string. e.g. "Nama Produk" -> "nama_produk"
-        if (!isset($row['nama_produk']) || !isset($row['tahun']) || !isset($row['bulan'])) {
+        if (!isset($row['tanggal'])) {
             return null;
         }
 
-        $produk = \App\Models\Produk::whereRaw('LOWER(nama_produk) = ?', [strtolower(trim($row['nama_produk']))])->first();
-
-        if (!$produk) {
-            return null; // Ignore if product by that name is not found
+        // Convert excel date format if necessary
+        $tanggal = $row['tanggal'];
+        if (is_numeric($tanggal)) {
+            $tanggal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($tanggal)->format('Y-m-d');
         }
 
         return DataPenjualan::updateOrCreate(
             [
-                'id_produk' => $produk->id_produk,
-                'tahun' => $row['tahun'],
-                'bulan' => $row['bulan'],
+                'tanggal' => $tanggal,
             ],
             [
-                'jumlah' => isset($row['jumlah']) ? $row['jumlah'] : ($row['jumlah_kg'] ?? 0),
+                'produksi_tahu_kecil' => $row['produksi_tahu_kecil'] ?? 0,
+                'produksi_tahu_besar' => $row['produksi_tahu_besar'] ?? 0,
+                'total_produksi' => $row['total_produksi'] ?? 0,
+                'penjualan_tahu_kecil' => $row['penjualan_tahu_kecil'] ?? 0,
+                'penjualan_tahu_besar' => $row['penjualan_tahu_besar'] ?? 0,
+                'total_penjualan' => $row['total_penjualan'] ?? 0,
+                'tahu_kembali_kecil' => $row['tahu_kembali_kecil'] ?? 0,
+                'tahu_kembali_besar' => $row['tahu_kembali_besar'] ?? 0,
             ]
         );
     }
@@ -37,11 +41,15 @@ class DataPenjualanImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'nama_produk' => 'required',
-            'tahun' => 'required|integer',
-            'bulan' => 'required|integer|between:1,12',
-            'jumlah' => 'nullable|numeric|min:0',
-            'jumlah_kg' => 'nullable|numeric|min:0',
+            'tanggal' => 'required',
+            'produksi_tahu_kecil' => 'nullable|integer|min:0',
+            'produksi_tahu_besar' => 'nullable|integer|min:0',
+            'total_produksi' => 'nullable|integer|min:0',
+            'penjualan_tahu_kecil' => 'nullable|integer|min:0',
+            'penjualan_tahu_besar' => 'nullable|integer|min:0',
+            'total_penjualan' => 'nullable|integer|min:0',
+            'tahu_kembali_kecil' => 'nullable|integer|min:0',
+            'tahu_kembali_besar' => 'nullable|integer|min:0',
         ];
     }
 }

@@ -11,31 +11,20 @@ class DataPenjualan extends Model
     protected $primaryKey = 'id_data_penjualan';
 
     protected $fillable = [
-        'id_produk',
-        'bulan',
-        'tahun',
-        'jumlah'
+        'tanggal',
+        'produksi_tahu_kecil',
+        'produksi_tahu_besar',
+        'total_produksi',
+        'penjualan_tahu_kecil',
+        'penjualan_tahu_besar',
+        'total_penjualan',
+        'tahu_kembali_kecil',
+        'tahu_kembali_besar'
     ];
-
-    public static function getWindowPenjualan($posisi, $id_produk, $jumlahSebelumnya = 3)
-    {
-        $start = max(0, $posisi - $jumlahSebelumnya);
-
-        return self::where('id_produk', $id_produk)
-            ->orderBy('tahun')
-            ->orderBy('bulan')
-            ->skip($start)
-            ->take($jumlahSebelumnya + 1)
-            ->pluck('jumlah'); // hanya ambil jumlah
-    }
 
     public function hasilPrediksi(): HasOne
     {
         return $this->hasOne(HasilPrediksi::class, 'id_data_penjualan');
     }
 
-    public function produk(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Produk::class, 'id_produk', 'id_produk');
-    }
 }

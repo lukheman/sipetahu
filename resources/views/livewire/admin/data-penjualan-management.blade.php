@@ -46,10 +46,11 @@
             <table class="table table-modern">
                 <thead>
                     <tr>
-                        <th>Produk</th>
-                        <th>Tahun</th>
-                        <th>Bulan</th>
-                        <th>Jumlah (kg)</th>
+                        <th>Tanggal</th>
+                        <th>Prod T.Kecil</th>
+                        <th>Prod T.Besar</th>
+                        <th>Penj T.Kecil</th>
+                        <th>Penj T.Besar</th>
                         <th style="width: 120px;">Aksi</th>
                     </tr>
                 </thead>
@@ -57,20 +58,12 @@
                     @forelse ($records as $record)
                         <tr wire:key="record-{{ $record->id_data_penjualan }}">
                             <td>
-                                <span
-                                    class="badge {{ optional($record->produk)->nama_produk == 'Tahu' ? 'bg-warning text-dark' : 'bg-success text-white' }} px-2 py-1">
-                                    {{ optional($record->produk)->nama_produk ?? 'Pilih Produk' }}
-                                </span>
+                                {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
                             </td>
-                            <td class="fw-semibold" style="color: var(--text-primary);">
-                                {{ $record->tahun }}
-                            </td>
-                            <td>
-                                {{ $bulanOptions[$record->bulan] ?? $record->bulan }}
-                            </td>
-                            <td>
-                                {{ number_format($record->jumlah, 2, ',', '.') }} kg
-                            </td>
+                            <td>{{ number_format($record->produksi_tahu_kecil, 0, ',', '.') }}</td>
+                            <td>{{ number_format($record->produksi_tahu_besar, 0, ',', '.') }}</td>
+                            <td>{{ number_format($record->penjualan_tahu_kecil, 0, ',', '.') }}</td>
+                            <td>{{ number_format($record->penjualan_tahu_besar, 0, ',', '.') }}</td>
                             <td>
                                 <div class="d-flex gap-1">
                                     <button class="action-btn action-btn-edit"
@@ -120,52 +113,57 @@
                 </div>
 
                 <form wire:submit="save">
-                    <div class="mb-3">
-                        <label for="id_produk" class="form-label">Produk <span
-                                style="color: var(--danger-color);">*</span></label>
-                        <select class="form-select @error('id_produk') is-invalid @enderror" id="id_produk"
-                            wire:model="id_produk">
-                            <option value="">-- Pilih Produk --</option>
-                            @foreach ($produkOptions as $p)
-                                <option value="{{ $p->id_produk }}">{{ $p->nama_produk }}</option>
-                            @endforeach
-                        </select>
-                        @error('id_produk')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="tanggal" class="form-label">Tanggal <span style="color: var(--danger-color);">*</span></label>
+                            <input type="date" class="form-control @error('tanggal') is-invalid @enderror" id="tanggal" wire:model="tanggal">
+                            @error('tanggal') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="tahun" class="form-label">Tahun <span
-                                style="color: var(--danger-color);">*</span></label>
-                        <input type="number" class="form-control @error('tahun') is-invalid @enderror" id="tahun"
-                            wire:model="tahun" placeholder="Masukkan tahun" min="2000" max="2100">
-                        @error('tahun')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="produksi_tahu_kecil" class="form-label">Produksi Tahu Kecil <span style="color: var(--danger-color);">*</span></label>
+                            <input type="number" class="form-control @error('produksi_tahu_kecil') is-invalid @enderror" id="produksi_tahu_kecil" wire:model="produksi_tahu_kecil">
+                            @error('produksi_tahu_kecil') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="produksi_tahu_besar" class="form-label">Produksi Tahu Besar <span style="color: var(--danger-color);">*</span></label>
+                            <input type="number" class="form-control @error('produksi_tahu_besar') is-invalid @enderror" id="produksi_tahu_besar" wire:model="produksi_tahu_besar">
+                            @error('produksi_tahu_besar') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="bulan" class="form-label">Bulan <span
-                                style="color: var(--danger-color);">*</span></label>
-                        <select class="form-select @error('bulan') is-invalid @enderror" id="bulan" wire:model="bulan">
-                            @foreach ($bulanOptions as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('bulan')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="total_produksi" class="form-label">Total Produksi <span style="color: var(--danger-color);">*</span></label>
+                            <input type="number" class="form-control @error('total_produksi') is-invalid @enderror" id="total_produksi" wire:model="total_produksi">
+                            @error('total_produksi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
 
-                    <div class="mb-4">
-                        <label for="jumlah" class="form-label">Jumlah (kg) <span
-                                style="color: var(--danger-color);">*</span></label>
-                        <input type="number" step="0.01" class="form-control @error('jumlah') is-invalid @enderror"
-                            id="jumlah" wire:model="jumlah" placeholder="Masukkan jumlah penjualan">
-                        @error('jumlah')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <div class="col-md-6 mb-3">
+                            <label for="penjualan_tahu_kecil" class="form-label">Penjualan Tahu Kecil <span style="color: var(--danger-color);">*</span></label>
+                            <input type="number" class="form-control @error('penjualan_tahu_kecil') is-invalid @enderror" id="penjualan_tahu_kecil" wire:model="penjualan_tahu_kecil">
+                            @error('penjualan_tahu_kecil') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="penjualan_tahu_besar" class="form-label">Penjualan Tahu Besar <span style="color: var(--danger-color);">*</span></label>
+                            <input type="number" class="form-control @error('penjualan_tahu_besar') is-invalid @enderror" id="penjualan_tahu_besar" wire:model="penjualan_tahu_besar">
+                            @error('penjualan_tahu_besar') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="total_penjualan" class="form-label">Total Penjualan <span style="color: var(--danger-color);">*</span></label>
+                            <input type="number" class="form-control @error('total_penjualan') is-invalid @enderror" id="total_penjualan" wire:model="total_penjualan">
+                            @error('total_penjualan') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="tahu_kembali_kecil" class="form-label">Tahu Kembali Kecil <span style="color: var(--danger-color);">*</span></label>
+                            <input type="number" class="form-control @error('tahu_kembali_kecil') is-invalid @enderror" id="tahu_kembali_kecil" wire:model="tahu_kembali_kecil">
+                            @error('tahu_kembali_kecil') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="tahu_kembali_besar" class="form-label">Tahu Kembali Besar <span style="color: var(--danger-color);">*</span></label>
+                            <input type="number" class="form-control @error('tahu_kembali_besar') is-invalid @enderror" id="tahu_kembali_besar" wire:model="tahu_kembali_besar">
+                            @error('tahu_kembali_besar') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2">

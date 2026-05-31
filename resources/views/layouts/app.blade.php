@@ -577,6 +577,13 @@ use App\Enums\Role;
             </x-sidebar-section>
         @endif
 
+        @if (auth()->user()->role === \App\Enums\Role::PEMILIK)
+            <x-sidebar-section title="Laporan">
+                <x-sidebar-link href="{{ route('admin.laporan-penjualan') }}" icon="fas fa-file-invoice-dollar" :active="request()->routeIs('admin.laporan-penjualan')">Laporan Penjualan</x-sidebar-link>
+                <x-sidebar-link href="{{ route('admin.laporan-wma') }}" icon="fas fa-chart-bar" :active="request()->routeIs('admin.laporan-wma')">Laporan WMA</x-sidebar-link>
+            </x-sidebar-section>
+        @endif
+
         <x-sidebar-section title="Prediksi">
             <x-sidebar-link href="{{ route('admin.prediksi-tahu') }}" icon="fas fa-chart-area" :active="request()->routeIs('admin.prediksi-tahu')">Prediksi WMA</x-sidebar-link>
         </x-sidebar-section>

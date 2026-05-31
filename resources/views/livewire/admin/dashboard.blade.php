@@ -28,8 +28,6 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0" style="color: var(--text-primary); font-weight: 600;"><i
                     class="fas fa-chart-area text-primary me-2"></i> Grafik Penjualan & Prediksi WMA (Tahu)</h5>
-            <div class="badge px-3 py-2 fs-6" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-color);">
-                Prediksi Aktif</div>
         </div>
         <div id="forecast_chart" style="min-height: 350px;"></div>
     </div>

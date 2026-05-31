@@ -25,10 +25,15 @@ class DataPenjualanManagement extends Component
     public string $search = '';
 
     // Form fields
-    public $id_produk = '';
-    public int $bulan = 1;
-    public int $tahun;
-    public string $jumlah = '';
+    public string $tanggal = '';
+    public int $produksi_tahu_kecil = 0;
+    public int $produksi_tahu_besar = 0;
+    public int $total_produksi = 0;
+    public int $penjualan_tahu_kecil = 0;
+    public int $penjualan_tahu_besar = 0;
+    public int $total_penjualan = 0;
+    public int $tahu_kembali_kecil = 0;
+    public int $tahu_kembali_besar = 0;
 
     // State
     public ?int $editingId = null;
@@ -53,30 +58,31 @@ class DataPenjualanManagement extends Component
 
     public function mount(): void
     {
-        $this->tahun = (int) now()->format('Y');
+        $this->tanggal = now()->format('Y-m-d');
     }
 
     protected function rules(): array
     {
         return [
-            'id_produk' => ['required', 'exists:produk,id_produk'],
-            'bulan' => ['required', 'integer', 'between:1,12'],
-            'tahun' => ['required', 'integer', 'min:2000', 'max:2100'],
-            'jumlah' => ['required', 'numeric', 'min:0'],
+            'tanggal' => ['required', 'date'],
+            'produksi_tahu_kecil' => ['required', 'integer', 'min:0'],
+            'produksi_tahu_besar' => ['required', 'integer', 'min:0'],
+            'total_produksi' => ['required', 'integer', 'min:0'],
+            'penjualan_tahu_kecil' => ['required', 'integer', 'min:0'],
+            'penjualan_tahu_besar' => ['required', 'integer', 'min:0'],
+            'total_penjualan' => ['required', 'integer', 'min:0'],
+            'tahu_kembali_kecil' => ['required', 'integer', 'min:0'],
+            'tahu_kembali_besar' => ['required', 'integer', 'min:0'],
         ];
     }
 
     protected function messages(): array
     {
         return [
-            'bulan.required' => 'Bulan wajib dipilih.',
-            'tahun.required' => 'Tahun wajib diisi.',
-            'tahun.integer' => 'Tahun harus berupa angka.',
-            'tahun.min' => 'Tahun minimal 2000.',
-            'tahun.max' => 'Tahun maksimal 2100.',
-            'jumlah.required' => 'Jumlah wajib diisi.',
-            'jumlah.numeric' => 'Jumlah harus berupa angka.',
-            'jumlah.min' => 'Jumlah tidak boleh negatif.',
+            'tanggal.required' => 'Tanggal wajib diisi.',
+            '*.required' => 'Kolom ini wajib diisi.',
+            '*.integer' => 'Kolom ini harus berupa angka bulat.',
+            '*.min' => 'Nilai tidak boleh negatif.',
         ];
     }
 
@@ -96,10 +102,15 @@ class DataPenjualanManagement extends Component
     {
         $record = DataPenjualan::findOrFail($id);
         $this->editingId = $id;
-        $this->id_produk = $record->id_produk ?? '';
-        $this->bulan = $record->bulan;
-        $this->tahun = $record->tahun;
-        $this->jumlah = (string) $record->jumlah;
+        $this->tanggal = $record->tanggal;
+        $this->produksi_tahu_kecil = $record->produksi_tahu_kecil;
+        $this->produksi_tahu_besar = $record->produksi_tahu_besar;
+        $this->total_produksi = $record->total_produksi;
+        $this->penjualan_tahu_kecil = $record->penjualan_tahu_kecil;
+        $this->penjualan_tahu_besar = $record->penjualan_tahu_besar;
+        $this->total_penjualan = $record->total_penjualan;
+        $this->tahu_kembali_kecil = $record->tahu_kembali_kecil;
+        $this->tahu_kembali_besar = $record->tahu_kembali_besar;
         $this->showModal = true;
     }
 
@@ -151,10 +162,15 @@ class DataPenjualanManagement extends Component
 
     protected function resetForm(): void
     {
-        $this->id_produk = '';
-        $this->bulan = 1;
-        $this->tahun = (int) now()->format('Y');
-        $this->jumlah = '';
+        $this->tanggal = now()->format('Y-m-d');
+        $this->produksi_tahu_kecil = 0;
+        $this->produksi_tahu_besar = 0;
+        $this->total_produksi = 0;
+        $this->penjualan_tahu_kecil = 0;
+        $this->penjualan_tahu_besar = 0;
+        $this->total_penjualan = 0;
+        $this->tahu_kembali_kecil = 0;
+        $this->tahu_kembali_besar = 0;
         $this->editingId = null;
     }
 
@@ -175,8 +191,8 @@ class DataPenjualanManagement extends Component
     public function downloadTemplate()
     {
         return response()->streamDownload(function () {
-            echo "nama_produk,tahun,bulan,jumlah\n";
-            echo "Tahu,2023,1,150.50\n";
+            echo "tanggal,produksi_tahu_kecil,produksi_tahu_besar,total_produksi,penjualan_tahu_kecil,penjualan_tahu_besar,total_penjualan,tahu_kembali_kecil,tahu_kembali_besar\n";
+            echo "2025-01-01,7056,6912,13968,6624,5616,12240,432,1296\n";
         }, 'template_import_penjualan.csv');
     }
 
@@ -212,21 +228,16 @@ class DataPenjualanManagement extends Component
     public function render()
     {
         $records = DataPenjualan::query()
-            ->with('produk')
             ->when(
                 $this->search,
                 fn($q) =>
-                $q->where('tahun', 'like', '%' . $this->search . '%')
+                $q->where('tanggal', 'like', '%' . $this->search . '%')
             )
-            ->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
+            ->orderBy('tanggal', 'desc')
             ->paginate(10);
-
-        $produkOptions = Produk::all();
 
         return view('livewire.admin.data-penjualan-management', [
             'records' => $records,
-            'produkOptions' => $produkOptions,
         ]);
     }
 }

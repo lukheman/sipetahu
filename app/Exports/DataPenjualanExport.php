@@ -11,26 +11,36 @@ class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
 {
     public function collection()
     {
-        return DataPenjualan::with('produk')->get();
+        return DataPenjualan::orderBy('tanggal', 'desc')->get();
     }
 
     public function headings(): array
     {
         return [
-            'Nama Produk',
-            'Tahun',
-            'Bulan',
-            'Jumlah (kg)'
+            'Tanggal',
+            'Produksi Tahu Kecil',
+            'Produksi Tahu Besar',
+            'Total Produksi',
+            'Penjualan Tahu Kecil',
+            'Penjualan Tahu Besar',
+            'Total Penjualan',
+            'Tahu Kembali Kecil',
+            'Tahu Kembali Besar'
         ];
     }
 
     public function map($row): array
     {
         return [
-            optional($row->produk)->nama_produk,
-            $row->tahun,
-            $row->bulan,
-            $row->jumlah,
+            $row->tanggal,
+            $row->produksi_tahu_kecil,
+            $row->produksi_tahu_besar,
+            $row->total_produksi,
+            $row->penjualan_tahu_kecil,
+            $row->penjualan_tahu_besar,
+            $row->total_penjualan,
+            $row->tahu_kembali_kecil,
+            $row->tahu_kembali_besar,
         ];
     }
 }

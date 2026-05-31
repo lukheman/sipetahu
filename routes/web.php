@@ -6,6 +6,8 @@ use App\Livewire\Admin\UserManagement;
 use App\Livewire\Admin\Profile;
 use App\Livewire\Admin\ComponentDocs;
 use App\Livewire\Admin\DataPenjualanManagement;
+use App\Livewire\Admin\LaporanPenjualan;
+use App\Livewire\Admin\LaporanWma;
 use App\Livewire\Admin\ProdukManagement;
 use App\Livewire\Admin\PrediksiTahu;
 use App\Livewire\Auth\Login;
@@ -23,6 +25,8 @@ Route::get('/register', Register::class)->name('register');
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/data-penjualan', DataPenjualanManagement::class)->name('admin.data-penjualan');
+    Route::get('/laporan-penjualan', LaporanPenjualan::class)->name('admin.laporan-penjualan');
+    Route::get('/laporan-wma', LaporanWma::class)->name('admin.laporan-wma');
     Route::get('/prediksi-tahu', PrediksiTahu::class)->name('admin.prediksi-tahu');
     Route::get('/produk', ProdukManagement::class)->name('admin.produk');
     Route::get('/users', UserManagement::class)->name('admin.users');

@@ -11,12 +11,9 @@ class Produk extends Model
 
     protected $fillable = [
         'nama_produk',
+        'jenis_tahu',
         'harga',
         'deskripsi',
     ];
 
-    public function dataPenjualan(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(DataPenjualan::class, 'id_produk', 'id_produk');
-    }
 }

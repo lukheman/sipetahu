@@ -18,6 +18,7 @@ class ProdukManagement extends Component
 
     // Form fields
     public string $nama_produk = '';
+    public ?string $jenis_tahu = null;
     public string $harga = '';
     public string $deskripsi = '';
 
@@ -31,6 +32,7 @@ class ProdukManagement extends Component
     {
         return [
             'nama_produk' => ['required', 'string', 'max:255', 'in:Tahu,Tempe'],
+            'jenis_tahu' => ['nullable', 'required_if:nama_produk,Tahu', 'string', 'in:potongan besar,potongan kecil'],
             'harga' => ['required', 'numeric', 'min:0'],
             'deskripsi' => ['nullable', 'string'],
         ];
@@ -41,6 +43,8 @@ class ProdukManagement extends Component
         return [
             'nama_produk.required' => 'Nama produk wajib diisi.',
             'nama_produk.in' => 'Nama produk hanya boleh Tahu atau Tempe.',
+            'jenis_tahu.required_if' => 'Jenis tahu wajib diisi jika produk adalah Tahu.',
+            'jenis_tahu.in' => 'Jenis tahu tidak valid.',
             'harga.required' => 'Harga wajib diisi.',
             'harga.numeric' => 'Harga harus berupa angka.',
             'harga.min' => 'Harga tidak boleh negatif.',
@@ -64,6 +68,7 @@ class ProdukManagement extends Component
         $record = Produk::findOrFail($id);
         $this->editingId = $id;
         $this->nama_produk = $record->nama_produk;
+        $this->jenis_tahu = $record->jenis_tahu;
         $this->harga = (string) $record->harga;
         $this->deskripsi = $record->deskripsi ?? '';
         $this->showModal = true;
@@ -72,6 +77,10 @@ class ProdukManagement extends Component
     public function save(): void
     {
         $validated = $this->validate();
+
+        if ($validated['nama_produk'] !== 'Tahu') {
+            $validated['jenis_tahu'] = null;
+        }
 
         if ($this->editingId) {
             $record = Produk::findOrFail($this->editingId);
@@ -118,6 +127,7 @@ class ProdukManagement extends Component
     protected function resetForm(): void
     {
         $this->nama_produk = '';
+        $this->jenis_tahu = null;
         $this->harga = '';
         $this->deskripsi = '';
         $this->editingId = null;

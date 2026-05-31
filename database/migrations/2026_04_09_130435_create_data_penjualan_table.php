@@ -13,9 +13,15 @@ return new class extends Migration
     {
         Schema::create('data_penjualan', function (Blueprint $table) {
             $table->id('id_data_penjualan');
-            $table->integer('bulan');
-            $table->integer('tahun');
-            $table->decimal('jumlah'); // dalam kilogram (kg)
+            $table->date('tanggal');
+            $table->integer('produksi_tahu_kecil')->default(0);
+            $table->integer('produksi_tahu_besar')->default(0);
+            $table->integer('total_produksi')->default(0);
+            $table->integer('penjualan_tahu_kecil')->default(0);
+            $table->integer('penjualan_tahu_besar')->default(0);
+            $table->integer('total_penjualan')->default(0);
+            $table->integer('tahu_kembali_kecil')->default(0);
+            $table->integer('tahu_kembali_besar')->default(0);
             $table->timestamps();
         });
     }

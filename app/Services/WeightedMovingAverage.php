@@ -18,18 +18,18 @@ class WeightedMovingAverage
 
     }
 
-    public function calculateWMA(int $posisi, $id_produk): float
+    public function calculateWMA(array $monthlyData, int $posisi): float
     {
-
-        $data = DataPenjualan::getWindowPenjualan($posisi, $id_produk);
+        $start = max(0, $posisi - 3);
+        $data = array_slice($monthlyData, $start, 3);
 
         if (count($data) < 3) {
             return 0;
         }
 
-        $d3 = $data[0]; // 3 bulan lalu
-        $d2 = $data[1]; // 2 bulan lalu
-        $d1 = $data[2]; // 1 bulan lalu
+        $d3 = $data[0]['total_penjualan']; // 3 bulan lalu
+        $d2 = $data[1]['total_penjualan']; // 2 bulan lalu
+        $d1 = $data[2]['total_penjualan']; // 1 bulan lalu
 
         $totalBobot = $this->bobot1BulanLalu + $this->bobot2BulanLalu + $this->bobot3BulanLalu;
 
@@ -41,7 +41,6 @@ class WeightedMovingAverage
         ) / $totalBobot);
 
         return $result;
-
     }
 
     public function calculateMAD(float $xt, float $st): float
@@ -71,33 +70,33 @@ class WeightedMovingAverage
 
     public function generatePrediksiTahu()
     {
-
         $offset = 3;
-        $produkTahu = \App\Models\Produk::where('nama_produk', 'Tahu')->first();
+        
+        // Group by year and month
+        $monthlyRecords = DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
+            ->groupBy('tahun', 'bulan')
+            ->orderBy('tahun', 'asc')
+            ->orderBy('bulan', 'asc')
+            ->get();
 
-        if (!$produkTahu)
-            return;
-        $id_produk = $produkTahu->id_produk;
+        $monthlyDataArray = $monthlyRecords->toArray();
 
-        $dataPenjualan = DataPenjualan::where('id_produk', $id_produk)->orderBy('tahun')->orderBy('bulan')->get();
-
-
-        foreach ($dataPenjualan as $index => $data) {
+        foreach ($monthlyRecords as $index => $monthData) {
             if ($index < $offset) {
                 // WMA membutuhkan historis data sebelum index saat ini (misal 3 bulan)
                 continue;
             }
 
-            $xt = $data->jumlah;
+            $xt = $monthData->total_penjualan;
 
-            $wma = $this->calculateWMA($index, $id_produk);
+            $wma = $this->calculateWMA($monthlyDataArray, $index);
             $mad = $this->calculateMAD($xt, $wma);
             $error = $this->calculateError($xt, $wma);
             $mse = $this->calculateMSE($xt, $wma);
             $mape = $this->calculateMAPE($xt, $wma);
 
-            $data->hasilPrediksi()->updateOrCreate(
-                ['id_data_penjualan' => $data->id_data_penjualan], // kondisi
+            \App\Models\HasilPrediksi::updateOrCreate(
+                ['id_data_penjualan' => $monthData->last_id], // kondisi
                 [
                     'wma' => $wma,
                     'error' => $error,
@@ -106,11 +105,6 @@ class WeightedMovingAverage
                     'mape' => $mape,
                 ]
             );
-
-
         }
-
-
     }
-
 }

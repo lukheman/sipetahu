@@ -17,7 +17,7 @@ class Dashboard extends Component
         $stats = [
             'total_produk' => Produk::count(),
             'total_data' => DataPenjualan::count(),
-            'total_volume' => DataPenjualan::sum('jumlah'),
+            'total_volume' => DataPenjualan::sum('total_penjualan'),
             'avg_mape' => \App\Models\HasilPrediksi::avg('mape') ?? 0,
         ];
 
@@ -41,30 +41,36 @@ class Dashboard extends Component
             12 => 'Des',
         ];
 
-        if ($produkTahu) {
-            $records = DataPenjualan::with('hasilPrediksi')
-                ->where('id_produk', $produkTahu->id_produk)
-                ->orderBy('tahun')
-                ->orderBy('bulan')
-                ->get();
+        // Group by year and month for the chart
+        $monthlyRecords = DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
+            ->groupBy('tahun', 'bulan')
+            ->orderBy('tahun', 'asc')
+            ->orderBy('bulan', 'asc')
+            ->get();
 
-            foreach ($records as $record) {
-                $chartLabels[] = ($bulanOptions[$record->bulan] ?? '') . ' ' . substr($record->tahun, 2);
-                $chartActual[] = $record->jumlah;
-                $chartWma[] = $record->hasilPrediksi ? $record->hasilPrediksi->wma : null;
-            }
+        $monthlyDataArray = $monthlyRecords->toArray();
+        $predictions = \App\Models\HasilPrediksi::all()->keyBy('id_data_penjualan');
 
-            $totalCount = $records->count();
-            if ($totalCount >= 3) {
-                $lastRecord = $records->last();
-                $nextBulan = $lastRecord->bulan == 12 ? 1 : $lastRecord->bulan + 1;
-                $nextTahun = $lastRecord->bulan == 12 ? $lastRecord->tahun + 1 : $lastRecord->tahun;
-                $wmaNext = (new WeightedMovingAverage())->calculateWMA($totalCount, $produkTahu->id_produk);
+        foreach ($monthlyRecords as $record) {
+            $chartLabels[] = ($bulanOptions[$record->bulan] ?? '') . ' ' . substr($record->tahun, 2);
+            $chartActual[] = $record->total_penjualan;
+            
+            $prediksi = $predictions->get($record->last_id);
+            $chartWma[] = $prediksi ? $prediksi->wma : null;
+        }
 
-                $chartLabels[] = ($bulanOptions[$nextBulan] ?? '') . ' ' . substr($nextTahun, 2);
-                $chartActual[] = null;
-                $chartWma[] = $wmaNext;
-            }
+        $totalCount = count($monthlyDataArray);
+        if ($totalCount >= 3) {
+            $lastRecord = end($monthlyDataArray);
+            
+            $nextBulan = $lastRecord['bulan'] == 12 ? 1 : $lastRecord['bulan'] + 1;
+            $nextTahun = $lastRecord['bulan'] == 12 ? $lastRecord['tahun'] + 1 : $lastRecord['tahun'];
+            
+            $wmaNext = (new WeightedMovingAverage())->calculateWMA($monthlyDataArray, $totalCount);
+
+            $chartLabels[] = ($bulanOptions[$nextBulan] ?? '') . ' ' . substr($nextTahun, 2);
+            $chartActual[] = null;
+            $chartWma[] = $wmaNext;
         }
 
         return view('livewire.admin.dashboard', compact('stats', 'chartLabels', 'chartActual', 'chartWma'));

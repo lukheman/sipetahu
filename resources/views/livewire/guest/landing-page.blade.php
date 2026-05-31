@@ -51,10 +51,6 @@
                         <div class="dc-dots">
                             <span></span><span></span><span></span>
                         </div>
-                        <div class="dc-badge">
-                            <span class="pulse-dot"></span>
-                            Prediksi Aktif
-                        </div>
                     </div>
 
                     <div class="dc-body">
