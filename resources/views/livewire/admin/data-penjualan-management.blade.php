@@ -29,7 +29,16 @@
 
     {{-- Data Table Card --}}
     <div class="modern-card">
-        {{-- Search and Filters --}}
+        <x-tabs variant="underline" class="mb-4">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="harian-tab" data-bs-toggle="tab" data-bs-target="#harian" type="button" role="tab" aria-controls="harian" aria-selected="true">Data Harian</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bulanan-tab" data-bs-toggle="tab" data-bs-target="#bulanan" type="button" role="tab" aria-controls="bulanan" aria-selected="false">Rekap Bulanan</button>
+            </li>
+            <x-slot:content>
+                <div class="tab-pane fade show active" id="harian" role="tabpanel" aria-labelledby="harian-tab">
+                    {{-- Search and Filters --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="mb-0" style="color: var(--text-primary); font-weight: 600;">Semua Data Penjualan</h5>
             <div class="input-group" style="max-width: 300px;">
@@ -74,7 +83,7 @@
                             <td>{{ number_format($record->penjualan_tahu_besar, 0, ',', '.') }}</td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <x-button 
+                                    <x-button
                                         wire:click="openEditModal({{ $record->id_data_penjualan }})" title="Edit data">
                                         <i class="fas fa-edit"></i>
                                     </x-button>
@@ -105,6 +114,34 @@
                 {{ $records->links() }}
             </div>
         @endif
+                </div>
+
+                <div class="tab-pane fade" id="bulanan" role="tabpanel" aria-labelledby="bulanan-tab">
+                    <div class="table-responsive">
+                        <table class="table table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Bulan</th>
+                                    <th>Jumlah Penjualan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($this->monthlyRecords as $rec)
+                                    <tr>
+                                        <td class="fw-semibold">{{ $bulanOptions[$rec->bulan] ?? $rec->bulan }} {{ $rec->tahun }}</td>
+                                        <td class="fw-bold" style="color: var(--primary-color);">{{ number_format($rec->total_penjualan, 0, ',', '.') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="2" class="text-center py-4 text-muted">Belum ada data bulanan.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </x-slot:content>
+        </x-tabs>
     </div>
 
     {{-- Create/Edit Modal --}}

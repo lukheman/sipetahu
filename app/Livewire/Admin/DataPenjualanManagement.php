@@ -237,6 +237,16 @@ class DataPenjualanManagement extends Component
         return Excel::download(new DataPenjualanExport, 'data_penjualan.xlsx');
     }
 
+    #[\Livewire\Attributes\Computed]
+    public function monthlyRecords()
+    {
+        return DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan')
+            ->groupBy('tahun', 'bulan')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->get();
+    }
+
     public function render()
     {
         $records = DataPenjualan::query()
