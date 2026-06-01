@@ -34,4 +34,10 @@ class DataPenjualan extends Model
         return $this->hasOne(HasilPrediksi::class, 'id_data_penjualan');
     }
 
+    protected static function booted()
+    {
+        static::deleting(function ($dataPenjualan) {
+            $dataPenjualan->hasilPrediksi()->delete();
+        });
+    }
 }
