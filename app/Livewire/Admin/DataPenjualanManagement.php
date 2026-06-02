@@ -202,10 +202,7 @@ class DataPenjualanManagement extends Component
 
     public function downloadTemplate()
     {
-        return response()->streamDownload(function () {
-            echo "tanggal,produksi_tahu_kecil,produksi_tahu_besar,total_produksi,penjualan_tahu_kecil,penjualan_tahu_besar,total_penjualan,tahu_kembali_kecil,tahu_kembali_besar\n";
-            echo "2025-01-01,7056,6912,13968,6624,5616,12240,432,1296\n";
-        }, 'template_import_penjualan.csv');
+        return Excel::download(new \App\Exports\TemplatePenjualanExport, 'template_import_penjualan.xlsx');
     }
 
     public function importData()
@@ -220,15 +217,17 @@ class DataPenjualanManagement extends Component
         ]);
 
         try {
-            Excel::import(new DataPenjualanImport, $this->file_import->path());
-            session()->flash('success', 'Data penjualan berhasil diimpor.');
+            $import = new DataPenjualanImport;
+            Excel::import($import, $this->file_import->path());
+
+            if ($import->importedCount > 0) {
+                session()->flash('success', "Berhasil mengimpor {$import->importedCount} data penjualan.");
+            } else {
+                session()->flash('error', 'Tidak ada data yang berhasil diimpor. Pastikan format file sesuai template.');
+            }
             $this->closeImportModal();
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            $failures = $e->failures();
-            $errorMsg = 'Error pada baris ' . $failures[0]->row() . ': ' . $failures[0]->errors()[0];
-            $this->addError('file_import', $errorMsg);
         } catch (\Exception $e) {
-            $this->addError('file_import', 'Gagal mengimpor data: Pastikan format template sudah benar.');
+            $this->addError('file_import', 'Gagal mengimpor data: ' . $e->getMessage());
         }
     }
 
