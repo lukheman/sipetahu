@@ -13,9 +13,9 @@
     <meta name="description" content="{{ $description }}">
     <title>{{ $title }}</title>
 
-    <!-- Fonts: Syne (display) + DM Sans (body) -->
+    <!-- Fonts: Outfit (display) + Inter (body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/fontawesome-free-7.2.0-web/css/all.min.css')}}">
     <link rel="stylesheet" href="{{ asset('assets/bootstrap/css/bootstrap.min.css')}}">
 
@@ -33,8 +33,8 @@
             --green-brand:   #10b981;
             --green-dark:    #059669;
 
-            --font-display:  'Syne', sans-serif;
-            --font-body:     'DM Sans', sans-serif;
+            --font-display:  'Outfit', sans-serif;
+            --font-body:     'Inter', sans-serif;
 
             --radius-sm:  6px;
             --radius-md:  12px;
@@ -785,9 +785,7 @@
 
             {{-- Brand --}}
             <a href="/" class="site-brand">
-                <div class="brand-icon-box">
-                    <i class="fas fa-chart-line"></i>
-                </div>
+                <img src="{{ asset('images/logo.jpg') }}" alt="Sipetahu Logo" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover;">
                 <span class="brand-wordmark"></span>
             </a>
 
@@ -797,7 +795,6 @@
                 <li><a href="/#tentang" class="site-nav-link">Tentang</a></li>
                 <li><a href="/#fitur"   class="site-nav-link">Fitur</a></li>
                 <li><a href="/#metode"  class="site-nav-link">Metode</a></li>
-                <li><a href="/#kontak"  class="site-nav-link">Kontak</a></li>
             </ul>
 
             {{-- Actions --}}
@@ -839,9 +836,7 @@
                     {{-- Brand blurb --}}
                     <div class="footer-brand-area">
                         <a href="/" class="site-brand" style="text-decoration:none;">
-                            <div class="brand-icon-box">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
+                            <img src="{{ asset('images/logo.jpg') }}" alt="Sipetahu Logo" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover; margin-right: 8px;">
                             <span class="brand-wordmark"></span>
                         </a>
                         <p>Sistem cerdas prediksi penjualan produk tahu menggunakan metode Weighted Moving Average (WMA) untuk UMKM Indonesia.</p>

@@ -4,8 +4,8 @@
 ])
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-        <i class="{{ $brandIcon }}"></i>
+    <div class="sidebar-brand d-flex align-items-center gap-2">
+        <img src="{{ asset('images/logo.jpg') }}" alt="Logo" style="height: 32px; width: 32px; border-radius: 8px; object-fit: cover;">
         <span>{{ $brandName }}</span>
     </div>
     <div class="sidebar-menu">

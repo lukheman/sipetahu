@@ -1,10 +1,8 @@
 <div class="login-container">
     <div class="login-card">
         <!-- Brand Logo -->
-        <div class="brand-logo">
-            <div class="icon-wrapper">
-                <i class="fas fa-layer-group"></i>
-            </div>
+        <div class="brand-logo text-center mb-4">
+            <img src="{{ asset('images/logo.jpg') }}" alt="Sipetahu Logo" style="width: 80px; height: 80px; border-radius: 16px; object-fit: cover; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
             <h1>Create Account</h1>
             <p>Sign up to get started with AdminPro</p>
         </div>
