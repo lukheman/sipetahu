@@ -9,34 +9,34 @@ use Illuminate\Support\Facades\Cache;
 class WeightedMovingAverage
 {
 
-    private int $bobot1BulanLalu = 3;
-    private int $bobot2BulanLalu = 2;
-    private int $bobot3BulanLalu = 1;
+    private int $bobot1HariLalu = 3;
+    private int $bobot2HariLalu = 2;
+    private int $bobot3HariLalu = 1;
 
     public function __construct()
     {
 
     }
 
-    public function calculateWMA(array $monthlyData, int $posisi): float
+    public function calculateWMA(array $dailyData, int $posisi): float
     {
         $start = max(0, $posisi - 3);
-        $data = array_slice($monthlyData, $start, 3);
+        $data = array_slice($dailyData, $start, 3);
 
         if (count($data) < 3) {
             return 0;
         }
 
-        $d3 = $data[0]['total_penjualan']; // 3 bulan lalu
-        $d2 = $data[1]['total_penjualan']; // 2 bulan lalu
-        $d1 = $data[2]['total_penjualan']; // 1 bulan lalu
+        $d3 = $data[0]['total_penjualan']; // 3 hari lalu
+        $d2 = $data[1]['total_penjualan']; // 2 hari lalu
+        $d1 = $data[2]['total_penjualan']; // 1 hari lalu
 
-        $totalBobot = $this->bobot1BulanLalu + $this->bobot2BulanLalu + $this->bobot3BulanLalu;
+        $totalBobot = $this->bobot1HariLalu + $this->bobot2HariLalu + $this->bobot3HariLalu;
 
         $result = round((
-            ($d1 * $this->bobot1BulanLalu) +
-            ($d2 * $this->bobot2BulanLalu) +
-            ($d3 * $this->bobot3BulanLalu)
+            ($d1 * $this->bobot1HariLalu) +
+            ($d2 * $this->bobot2HariLalu) +
+            ($d3 * $this->bobot3HariLalu)
 
         ) / $totalBobot);
 
@@ -72,31 +72,31 @@ class WeightedMovingAverage
     {
         $offset = 3;
         
-        // Group by year and month
-        $monthlyRecords = DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->groupBy('tahun', 'bulan')
-            ->orderBy('tahun', 'asc')
-            ->orderBy('bulan', 'asc')
+        // Ambil data harian dari Desember (12), Januari (1), Februari (2)
+        $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->groupBy('tanggal')
+            ->orderBy('tanggal', 'asc')
             ->get();
 
-        $monthlyDataArray = $monthlyRecords->toArray();
+        $dailyDataArray = $dailyRecords->toArray();
 
-        foreach ($monthlyRecords as $index => $monthData) {
+        foreach ($dailyRecords as $index => $dayData) {
             if ($index < $offset) {
-                // WMA membutuhkan historis data sebelum index saat ini (misal 3 bulan)
+                // WMA membutuhkan historis data sebelum index saat ini (misal 3 hari)
                 continue;
             }
 
-            $xt = $monthData->total_penjualan;
+            $xt = $dayData->total_penjualan;
 
-            $wma = $this->calculateWMA($monthlyDataArray, $index);
+            $wma = $this->calculateWMA($dailyDataArray, $index);
             $mad = $this->calculateMAD($xt, $wma);
             $error = $this->calculateError($xt, $wma);
             $mse = $this->calculateMSE($xt, $wma);
             $mape = $this->calculateMAPE($xt, $wma);
 
             \App\Models\HasilPrediksi::updateOrCreate(
-                ['id_data_penjualan' => $monthData->last_id], // kondisi
+                ['id_data_penjualan' => $dayData->last_id], // kondisi
                 [
                     'wma' => $wma,
                     'error' => $error,

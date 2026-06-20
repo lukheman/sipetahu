@@ -59,8 +59,8 @@
             style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
             <h5 class="mb-3 text-white"><i class="fas fa-lightbulb text-warning me-2"></i> Kesimpulan Prediksi</h5>
             <p class="mb-2 fs-5">
-                Berdasarkan tren penjualan Tahu di bulan-bulan sebelumnya, kami memperkirakan jumlah penjualan untuk
-                <strong>{{ $bulanOptions[$nextPrediction['bulan']] ?? $nextPrediction['bulan'] }} {{ $nextPrediction['tahun'] }}</strong> adalah sebanyak
+                Berdasarkan tren penjualan Tahu di hari-hari sebelumnya (Desember - Februari), kami memperkirakan jumlah penjualan untuk
+                <strong>tanggal {{ $nextPrediction['tanggal'] }}</strong> adalah sebanyak
                 <strong>{{ number_format($nextPrediction['wma'], 0, ',', '.') }}</strong>.
             </p>
             <p class="mb-0 text-white-50" style="font-size: 0.9rem;">

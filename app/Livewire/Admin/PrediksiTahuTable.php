@@ -22,22 +22,21 @@ class PrediksiTahuTable extends Component
 
     public function render()
     {
-        // Get paginated monthly records
-        $records = DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->groupBy('tahun', 'bulan')
-            ->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
+        // Get paginated daily records
+        $records = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->groupBy('tanggal')
+            ->orderBy('tanggal', 'desc')
             ->paginate(10);
 
-        // Fetch predictions to map them to the monthly records
-        // We only fetch predictions that match the current page's last_ids to be efficient
+        // Fetch predictions to map them to the daily records
         $lastIds = $records->pluck('last_id');
         $predictions = HasilPrediksi::whereIn('id_data_penjualan', $lastIds)->get()->keyBy('id_data_penjualan');
         
-        $allRecords = DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan')
-            ->groupBy('tahun', 'bulan')
-            ->orderBy('tahun', 'asc')
-            ->orderBy('bulan', 'asc')
+        $allRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->groupBy('tanggal')
+            ->orderBy('tanggal', 'asc')
             ->get()
             ->toArray();
 
@@ -50,7 +49,7 @@ class PrediksiTahuTable extends Component
                 // Find index
                 $idx = -1;
                 foreach($allRecords as $k => $arr) {
-                    if ($arr['tahun'] == $record->tahun && $arr['bulan'] == $record->bulan) {
+                    if ($arr['tanggal'] == $record->tanggal) {
                         $idx = $k;
                         break;
                     }

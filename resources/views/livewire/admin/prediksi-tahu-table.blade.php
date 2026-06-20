@@ -1,12 +1,11 @@
 <div class="modern-card">
-    <h5 class="mb-4" style="color: var(--text-primary); font-weight: 600;">Hasil Prediksi WMA Bulanan (Tahu)</h5>
+    <h5 class="mb-4" style="color: var(--text-primary); font-weight: 600;">Hasil Prediksi WMA Harian (Tahu)</h5>
 
     <div class="table-responsive">
         <table class="table table-modern">
             <thead>
                 <tr>
-                    <th>Tahun</th>
-                    <th>Bulan</th>
+                    <th>Tanggal</th>
                     <th>Aktual (Xt)</th>
                     <th>Prediksi (WMA)</th>
                     <th>Error</th>
@@ -18,8 +17,7 @@
             <tbody>
                 @if ($nextPrediction && $records->onFirstPage())
                     <tr style="background-color: var(--hover-bg);">
-                        <td class="fw-semibold text-primary">{{ $nextPrediction['tahun'] }}</td>
-                        <td class="text-primary">{{ $bulanOptions[$nextPrediction['bulan']] ?? $nextPrediction['bulan'] }}</td>
+                        <td class="fw-semibold text-primary">{{ $nextPrediction['tanggal'] }}</td>
                         <td class="text-muted fst-italic">Belum ada data</td>
                         <td>
                             <span class="badge bg-warning text-dark px-2 py-1 fs-6 shadow-sm">{{ number_format($nextPrediction['wma'], 2, ',', '.') }}</span>
@@ -37,8 +35,7 @@
                 @endif
                 @forelse ($records as $record)
                     <tr>
-                        <td class="fw-semibold">{{ $record->tahun }}</td>
-                        <td>{{ $bulanOptions[$record->bulan] ?? $record->bulan }}</td>
+                        <td class="fw-semibold">{{ \Carbon\Carbon::parse($record->tanggal)->translatedFormat('d F Y') }}</td>
                         <td class="fw-bold" style="color: var(--primary-color);">
                             {{ number_format($record->total_penjualan, 2, ',', '.') }}
                         </td>
@@ -69,7 +66,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">Belum ada data penjualan Tahu.</td>
+                        <td colspan="7" class="text-center py-4 text-muted">Belum ada data penjualan Tahu.</td>
                     </tr>
                 @endforelse
             </tbody>

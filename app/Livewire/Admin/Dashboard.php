@@ -41,34 +41,33 @@ class Dashboard extends Component
             12 => 'Des',
         ];
 
-        // Group by year and month for the chart
-        $monthlyRecords = DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->groupBy('tahun', 'bulan')
-            ->orderBy('tahun', 'asc')
-            ->orderBy('bulan', 'asc')
+        // Group by tanggal for the chart
+        $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->groupBy('tanggal')
+            ->orderBy('tanggal', 'asc')
             ->get();
 
-        $monthlyDataArray = $monthlyRecords->toArray();
+        $dailyDataArray = $dailyRecords->toArray();
         $predictions = \App\Models\HasilPrediksi::all()->keyBy('id_data_penjualan');
 
-        foreach ($monthlyRecords as $record) {
-            $chartLabels[] = ($bulanOptions[$record->bulan] ?? '') . ' ' . substr($record->tahun, 2);
+        foreach ($dailyRecords as $record) {
+            $chartLabels[] = \Carbon\Carbon::parse($record->tanggal)->format('d M y');
             $chartActual[] = $record->total_penjualan;
             
             $prediksi = $predictions->get($record->last_id);
             $chartWma[] = $prediksi ? $prediksi->wma : null;
         }
 
-        $totalCount = count($monthlyDataArray);
+        $totalCount = count($dailyDataArray);
         if ($totalCount >= 3) {
-            $lastRecord = end($monthlyDataArray);
+            $lastRecord = end($dailyDataArray);
             
-            $nextBulan = $lastRecord['bulan'] == 12 ? 1 : $lastRecord['bulan'] + 1;
-            $nextTahun = $lastRecord['bulan'] == 12 ? $lastRecord['tahun'] + 1 : $lastRecord['tahun'];
+            $nextDate = \Carbon\Carbon::parse($lastRecord['tanggal'])->addDay();
             
-            $wmaNext = (new WeightedMovingAverage())->calculateWMA($monthlyDataArray, $totalCount);
+            $wmaNext = (new WeightedMovingAverage())->calculateWMA($dailyDataArray, $totalCount);
 
-            $chartLabels[] = ($bulanOptions[$nextBulan] ?? '') . ' ' . substr($nextTahun, 2);
+            $chartLabels[] = $nextDate->format('d M y');
             $chartActual[] = null;
             $chartWma[] = $wmaNext;
         }

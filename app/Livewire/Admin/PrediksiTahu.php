@@ -31,25 +31,25 @@ class PrediksiTahu extends Component
     {
         $nextPrediction = null;
 
-        $monthlyRecords = DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan')
-            ->groupBy('tahun', 'bulan')
-            ->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
+        $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->groupBy('tanggal')
+            ->orderBy('tanggal', 'desc')
             ->take(3)
             ->get();
 
-        if ($monthlyRecords->count() >= 3) {
-            $lastRecord = $monthlyRecords->first();
+        if ($dailyRecords->count() >= 3) {
+            $lastRecord = $dailyRecords->first();
 
-            $nextBulan = $lastRecord->bulan == 12 ? 1 : $lastRecord->bulan + 1;
-            $nextTahun = $lastRecord->bulan == 12 ? $lastRecord->tahun + 1 : $lastRecord->tahun;
+            $nextDate = \Carbon\Carbon::parse($lastRecord->tanggal)->addDay();
+            $nextHariStr = $nextDate->format('d M Y');
 
             $wmaService = new WeightedMovingAverage();
 
-            $ascRecords = DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan')
-                ->groupBy('tahun', 'bulan')
-                ->orderBy('tahun', 'asc')
-                ->orderBy('bulan', 'asc')
+            $ascRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
+                ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+                ->groupBy('tanggal')
+                ->orderBy('tanggal', 'asc')
                 ->get()
                 ->toArray();
 
@@ -65,8 +65,7 @@ class PrediksiTahu extends Component
             }
 
             $nextPrediction = [
-                'bulan' => $nextBulan,
-                'tahun' => $nextTahun,
+                'tanggal' => $nextHariStr,
                 'wma' => $wmaNext,
                 'detail_wma' => $detailStr
             ];

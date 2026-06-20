@@ -21,15 +21,15 @@ class LaporanWma extends Component
 
     public function exportPdf()
     {
-        $monthlyRecords = DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->groupBy('tahun', 'bulan')
-            ->orderBy('tahun', 'asc')
-            ->orderBy('bulan', 'asc')
+        $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->groupBy('tanggal')
+            ->orderBy('tanggal', 'asc')
             ->get();
             
         $predictions = HasilPrediksi::all()->keyBy('id_data_penjualan');
         
-        foreach($monthlyRecords as $record) {
+        foreach($dailyRecords as $record) {
             $record->hasilPrediksi = $predictions->get($record->last_id);
         }
 
@@ -38,7 +38,7 @@ class LaporanWma extends Component
         $avgMAPE = HasilPrediksi::has('dataPenjualan')->avg('mape') ?? 0;
 
         $pdf = Pdf::loadView('pdf.laporan-wma', [
-            'records' => $monthlyRecords,
+            'records' => $dailyRecords,
             'avgMAD' => $avgMAD,
             'avgMSE' => $avgMSE,
             'avgMAPE' => $avgMAPE,

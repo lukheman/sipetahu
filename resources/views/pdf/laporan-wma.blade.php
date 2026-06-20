@@ -103,8 +103,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Tahun</th>
-                <th>Bulan</th>
+                <th>Tanggal</th>
                 <th>Aktual (Xt)</th>
                 <th>Prediksi (WMA)</th>
                 <th>Error</th>
@@ -114,18 +113,9 @@
             </tr>
         </thead>
         <tbody>
-            @php
-                $bulanOptions = [
-                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-                ];
-            @endphp
-
-            @forelse ($records->sortByDesc(fn($r) => $r->tahun * 100 + $r->bulan) as $record)
+            @forelse ($records->sortByDesc('tanggal') as $record)
                 <tr>
-                    <td>{{ $record->tahun }}</td>
-                    <td>{{ $bulanOptions[$record->bulan] ?? $record->bulan }}</td>
+                    <td>{{ \Carbon\Carbon::parse($record->tanggal)->translatedFormat('d F Y') }}</td>
                     <td style="font-weight: bold;">{{ number_format($record->total_penjualan, 2, ',', '.') }}</td>
                     <td>
                         @if($record->hasilPrediksi)
@@ -147,7 +137,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8">Belum ada data penjualan Tahu.</td>
+                    <td colspan="7">Belum ada data penjualan Tahu.</td>
                 </tr>
             @endforelse
         </tbody>
