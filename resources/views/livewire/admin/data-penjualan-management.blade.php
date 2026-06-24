@@ -208,7 +208,7 @@
     {{-- Create/Edit Modal --}}
     @if ($showModal)
         <div class="modal-backdrop-custom" wire:click.self="closeModal">
-            <div class="modal-content-custom" wire:click.stop>
+            <div class="modal-content-custom">
                 <div class="modal-header-custom">
                     <h5 class="modal-title-custom">
                         {{ $editingId ? 'Edit Data Penjualan' : 'Tambah Data Penjualan' }}
@@ -311,7 +311,7 @@
     {{-- Import Modal --}}
     @if ($showImportModal)
         <div class="modal-backdrop-custom" wire:click.self="closeImportModal">
-            <div class="modal-content-custom" wire:click.stop style="max-width: 500px;">
+            <div class="modal-content-custom" style="max-width: 500px;">
                 <div class="modal-header-custom">
                     <h5 class="modal-title-custom">Import Data Penjualan</h5>
                     <button type="button" class="modal-close-btn" wire:click="closeImportModal">
@@ -330,8 +330,17 @@
                             </button>
                         </div>
 
+                        <label for="file_import" class="d-block w-100 p-4 border rounded text-center mb-2 shadow-sm" style="cursor: pointer; background: var(--bg-primary); border-style: dashed !important; border-width: 2px !important; border-color: var(--primary-color) !important;">
+                            <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color: var(--primary-color);"></i><br>
+                            @if ($file_import)
+                                <span class="fw-semibold text-success"><i class="fas fa-check-circle me-1"></i> File Siap Diimport!</span>
+                            @else
+                                <span class="fw-semibold text-primary">Klik di sini untuk Browse File</span>
+                            @endif
+                        </label>
+
                         <input type="file" class="form-control @error('file_import') is-invalid @enderror" id="file_import"
-                            wire:model="file_import" accept=".xlsx,.xls,.csv" required>
+                            wire:model="file_import" accept=".xlsx,.xls,.csv" required style="display: none;">
 
                         <div wire:loading wire:target="file_import" class="text-muted small mt-1">
                             <i class="fas fa-spinner fa-spin me-1"></i> Mengunggah file...
