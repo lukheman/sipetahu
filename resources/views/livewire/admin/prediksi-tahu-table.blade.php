@@ -1,5 +1,24 @@
 <div class="modern-card">
-    <h5 class="mb-4" style="color: var(--text-primary); font-weight: 600;">Hasil Prediksi WMA Harian (Tahu)</h5>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="mb-0" style="color: var(--text-primary); font-weight: 600;">Hasil Prediksi WMA Harian (Tahu)</h5>
+        <div class="d-flex gap-2">
+            <div style="width: 150px;">
+                <select wire:model.live="perPage" class="form-select form-select-sm shadow-sm" style="border-radius: 8px; background-color: var(--bg-light);">
+                    <option value="10">10 Data</option>
+                    <option value="25">25 Data</option>
+                    <option value="50">50 Data</option>
+                    <option value="100">100 Data</option>
+                    <option value="0">Semua Data</option>
+                </select>
+            </div>
+            <div style="width: 200px;">
+                <select wire:model.live="sort_tanggal" class="form-select form-select-sm shadow-sm" style="border-radius: 8px; background-color: var(--bg-light);">
+                    <option value="desc">Tanggal Terbaru</option>
+                    <option value="asc">Tanggal Terlama</option>
+                </select>
+            </div>
+        </div>
+    </div>
 
     <div class="table-responsive">
         <table class="table table-modern">
@@ -15,7 +34,7 @@
                 </tr>
             </thead>
             <tbody>
-                @if ($nextPrediction && $records->onFirstPage())
+                @if ($nextPrediction && $records->onFirstPage() && $sort_tanggal === 'desc')
                     <tr style="background-color: var(--hover-bg);">
                         <td class="fw-semibold text-primary">{{ $nextPrediction['tanggal'] }}</td>
                         <td class="text-muted fst-italic">Belum ada data</td>
@@ -69,6 +88,24 @@
                         <td colspan="7" class="text-center py-4 text-muted">Belum ada data penjualan Tahu.</td>
                     </tr>
                 @endforelse
+                @if ($nextPrediction && $records->onLastPage() && $sort_tanggal === 'asc')
+                    <tr style="background-color: var(--hover-bg);">
+                        <td class="fw-semibold text-primary">{{ $nextPrediction['tanggal'] }}</td>
+                        <td class="text-muted fst-italic">Belum ada data</td>
+                        <td>
+                            <span class="badge bg-warning text-dark px-2 py-1 fs-6 shadow-sm">{{ number_format($nextPrediction['wma'], 2, ',', '.') }}</span>
+                            @if(!empty($nextPrediction['detail_wma']))
+                                <div class="mt-1" style="font-size: 0.75rem; color: var(--text-muted);">
+                                    Rumus: {{ $nextPrediction['detail_wma'] }}
+                                </div>
+                            @endif
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td class="text-muted">-</td>
+                        <td class="text-muted">-</td>
+                        <td class="text-muted">-</td>
+                    </tr>
+                @endif
             </tbody>
         </table>
     </div>

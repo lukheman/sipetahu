@@ -8,11 +8,23 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\On;
 
+use Livewire\Attributes\Reactive;
+
 class PrediksiTahuTable extends Component
 {
     use WithPagination;
 
+    #[Reactive]
     public $nextPrediction;
+    
+    #[Reactive]
+    public $start_date;
+    
+    #[Reactive]
+    public $end_date;
+
+    public $sort_tanggal = 'desc';
+    public $perPage = 10;
 
     #[On('wma-calculated')]
     public function refreshTable()
@@ -20,21 +32,31 @@ class PrediksiTahuTable extends Component
         $this->resetPage();
     }
 
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
         // Get paginated daily records
-        $records = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+        $query = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
+            ->whereBetween('tanggal', [$this->start_date, $this->end_date])
             ->groupBy('tanggal')
-            ->orderBy('tanggal', 'desc')
-            ->paginate(10);
+            ->orderBy('tanggal', $this->sort_tanggal === 'asc' ? 'asc' : 'desc');
+
+        if ($this->perPage == 0) {
+            $records = $query->paginate(999999);
+        } else {
+            $records = $query->paginate($this->perPage);
+        }
 
         // Fetch predictions to map them to the daily records
         $lastIds = $records->pluck('last_id');
         $predictions = HasilPrediksi::whereIn('id_data_penjualan', $lastIds)->get()->keyBy('id_data_penjualan');
         
         $allRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->whereBetween('tanggal', [$this->start_date, $this->end_date])
             ->groupBy('tanggal')
             ->orderBy('tanggal', 'asc')
             ->get()

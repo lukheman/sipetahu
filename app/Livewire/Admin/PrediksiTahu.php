@@ -13,14 +13,27 @@ class PrediksiTahu extends Component
 {
     use WithPagination;
 
+    public $start_date;
+    public $end_date;
+
+    public function mount()
+    {
+        $firstData = \App\Models\DataPenjualan::orderBy('tanggal', 'asc')->first();
+        $lastData = \App\Models\DataPenjualan::orderBy('tanggal', 'desc')->first();
+
+        $this->start_date = $firstData ? $firstData->tanggal : now()->subMonths(3)->startOfMonth()->format('Y-m-d');
+        $this->end_date = $lastData ? $lastData->tanggal : now()->endOfMonth()->format('Y-m-d');
+    }
+
     public function kalkulasiWMA()
     {
         if (auth()->user()->role !== \App\Enums\Role::ADMIN) {
             abort(403, 'Hanya Admin yang dapat menghitung WMA.');
         }
 
+        \App\Models\HasilPrediksi::truncate();
         $wmaService = new WeightedMovingAverage();
-        $wmaService->generatePrediksiTahu();
+        $wmaService->generatePrediksiTahu($this->start_date, $this->end_date);
 
         session()->flash('success', 'Kalkulasi prediksi WMA berhasil dijalankan!');
 
@@ -32,7 +45,7 @@ class PrediksiTahu extends Component
         $nextPrediction = null;
 
         $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->whereBetween('tanggal', [$this->start_date, $this->end_date])
             ->groupBy('tanggal')
             ->orderBy('tanggal', 'desc')
             ->take(3)
@@ -47,7 +60,7 @@ class PrediksiTahu extends Component
             $wmaService = new WeightedMovingAverage();
 
             $ascRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
-                ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+                ->whereBetween('tanggal', [$this->start_date, $this->end_date])
                 ->groupBy('tanggal')
                 ->orderBy('tanggal', 'asc')
                 ->get()

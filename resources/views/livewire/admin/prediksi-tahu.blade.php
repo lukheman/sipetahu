@@ -1,19 +1,5 @@
 <div>
     <x-page-header title="Prediksi Penjualan WMA (Tahu)" subtitle="Analisis dan prediksi tren penjualan menggunakan metode Weighted Moving Average.">
-        <x-slot name="actions">
-            <div class="d-flex gap-2">
-                @if (auth()->user()->role === \App\Enums\Role::ADMIN)
-                    <x-button variant="warning" wire:click="kalkulasiWMA" wire:loading.attr="disabled">
-                        <span wire:loading.remove wire:target="kalkulasiWMA">
-                            <i class="fas fa-calculator me-2"></i>Kalkulasi WMA
-                        </span>
-                        <span wire:loading wire:target="kalkulasiWMA">
-                            <i class="fas fa-spinner fa-spin me-2"></i>Menghitung...
-                        </span>
-                    </x-button>
-                @endif
-            </div>
-        </x-slot>
     </x-page-header>
 
     @if (session('success'))
@@ -59,7 +45,7 @@
             style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
             <h5 class="mb-3 text-white"><i class="fas fa-lightbulb text-warning me-2"></i> Kesimpulan Prediksi</h5>
             <p class="mb-2 fs-5">
-                Berdasarkan tren penjualan Tahu di hari-hari sebelumnya (Desember - Februari), kami memperkirakan jumlah penjualan untuk
+                Berdasarkan tren penjualan Tahu pada rentang waktu yang dipilih, kami memperkirakan jumlah penjualan untuk
                 <strong>tanggal {{ $nextPrediction['tanggal'] }}</strong> adalah sebanyak
                 <strong>{{ number_format($nextPrediction['wma'], 0, ',', '.') }}</strong>.
             </p>
@@ -70,5 +56,29 @@
         </div>
     @endif
 
-    <livewire:admin.prediksi-tahu-table :nextPrediction="$nextPrediction" />
+    <div class="modern-card mb-4">
+        <h6 class="mb-3">Filter Rentang Waktu Perhitungan</h6>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label text-muted fw-semibold">Tanggal Mulai</label>
+                <input type="date" wire:model="start_date" class="form-control" style="background-color: var(--bg-light); border-radius: 8px;">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted fw-semibold">Tanggal Akhir</label>
+                <input type="date" wire:model="end_date" class="form-control" style="background-color: var(--bg-light); border-radius: 8px;">
+            </div>
+            <div class="col-md-4">
+                <x-button wire:click="kalkulasiWMA" class="btn btn-primary px-4 py-2 w-100 shadow-sm" style="border-radius: 8px;" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="kalkulasiWMA">
+                        <i class="fas fa-calculator me-2"></i>Hitung Prediksi (WMA)
+                    </span>
+                    <span wire:loading wire:target="kalkulasiWMA">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Menghitung...
+                    </span>
+                </x-button>
+            </div>
+        </div>
+    </div>
+
+    <livewire:admin.prediksi-tahu-table :nextPrediction="$nextPrediction" :start_date="$start_date" :end_date="$end_date" />
 </div>
