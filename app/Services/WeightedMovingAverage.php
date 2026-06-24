@@ -65,16 +65,16 @@ class WeightedMovingAverage
             return 0;
         }
 
-        return round(($this->calculateMAD($xt, $st) / $xt) * 100, 1);
+        return round(($this->calculateMAD($xt, $st) / $xt) * 100, 2);
     }
 
-    public function generatePrediksiTahu()
+    public function generatePrediksiTahu($startDate, $endDate)
     {
         $offset = 3;
-        
-        // Ambil data harian dari Desember (12), Januari (1), Februari (2)
+
+        // Ambil data harian berdasarkan rentang waktu yang dipilih
         $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->whereBetween('tanggal', [$startDate, $endDate])
             ->groupBy('tanggal')
             ->orderBy('tanggal', 'asc')
             ->get();
