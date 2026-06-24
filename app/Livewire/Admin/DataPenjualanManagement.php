@@ -318,11 +318,31 @@ class DataPenjualanManagement extends Component
     #[\Livewire\Attributes\Computed]
     public function monthlyRecords()
     {
-        return DataPenjualan::selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan, SUM(total_penjualan) as total_penjualan')
-            ->groupBy('tahun', 'bulan')
+        $details = \App\Models\DetailPenjualan::join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
+            ->join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
+            ->selectRaw('YEAR(data_penjualan.tanggal) as tahun, MONTH(data_penjualan.tanggal) as bulan, produk.nama_produk, SUM(detail_penjualan.penjualan) as total_penjualan_produk')
+            ->groupBy('tahun', 'bulan', 'produk.nama_produk')
             ->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
+            ->orderBy('produk.nama_produk', 'asc')
             ->get();
+
+        $grouped = [];
+        foreach($details as $d) {
+            $key = $d->tahun . '-' . str_pad($d->bulan, 2, '0', STR_PAD_LEFT);
+            if(!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'tahun' => $d->tahun,
+                    'bulan' => $d->bulan,
+                    'total_penjualan' => 0,
+                    'produk' => []
+                ];
+            }
+            $grouped[$key]['total_penjualan'] += $d->total_penjualan_produk;
+            $grouped[$key]['produk'][$d->nama_produk] = $d->total_penjualan_produk;
+        }
+
+        return collect($grouped)->values();
     }
 
     public function render()

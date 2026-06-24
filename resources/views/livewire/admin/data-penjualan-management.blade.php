@@ -183,18 +183,26 @@
                             <thead>
                                 <tr>
                                     <th>Bulan</th>
-                                    <th>Jumlah Penjualan</th>
+                                    @foreach($this->products as $p)
+                                        <th>{{ $p->nama_produk }}</th>
+                                    @endforeach
+                                    <th>Total Penjualan</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($this->monthlyRecords as $rec)
                                     <tr>
-                                        <td class="fw-semibold">{{ $bulanOptions[$rec->bulan] ?? $rec->bulan }} {{ $rec->tahun }}</td>
-                                        <td class="fw-bold" style="color: var(--primary-color);">{{ number_format($rec->total_penjualan, 0, ',', '.') }}</td>
+                                        <td class="fw-semibold">{{ $bulanOptions[$rec['bulan']] ?? $rec['bulan'] }} {{ $rec['tahun'] }}</td>
+                                        @foreach($this->products as $p)
+                                            <td>
+                                                {{ isset($rec['produk'][$p->nama_produk]) ? number_format($rec['produk'][$p->nama_produk], 0, ',', '.') : 0 }}
+                                            </td>
+                                        @endforeach
+                                        <td class="fw-bold" style="color: var(--primary-color);">{{ number_format($rec['total_penjualan'], 0, ',', '.') }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="2" class="text-center py-4 text-muted">Belum ada data bulanan.</td>
+                                        <td colspan="{{ count($this->products) + 2 }}" class="text-center py-4 text-muted">Belum ada data bulanan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
