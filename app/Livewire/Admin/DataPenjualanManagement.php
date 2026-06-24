@@ -223,6 +223,31 @@ class DataPenjualanManagement extends Component
         $this->deletingId = null;
     }
 
+    public bool $showDeleteAllModal = false;
+
+    public function confirmDeleteAll(): void
+    {
+        $this->showDeleteAllModal = true;
+    }
+
+    public function deleteAll(): void
+    {
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \App\Models\HasilPrediksi::truncate();
+        \App\Models\DetailPenjualan::truncate();
+        DataPenjualan::truncate();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        session()->flash('success', 'Semua data penjualan berhasil dihapus beserta seluruh riwayat prediksinya.');
+        $this->showDeleteAllModal = false;
+        $this->resetPage();
+    }
+
+    public function cancelDeleteAll(): void
+    {
+        $this->showDeleteAllModal = false;
+    }
+
     protected function resetForm(): void
     {
         $this->tanggal = now()->format('Y-m-d');

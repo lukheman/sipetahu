@@ -2,6 +2,9 @@
     {{-- Page Header --}}
     <x-page-header title="Data Penjualan" subtitle="Kelola data penjualan">
         <x-slot:actions>
+            <x-button variant="danger" icon="fas fa-trash-alt" wire:click="confirmDeleteAll" title="Hapus Semua Data" class="me-auto">
+                Hapus Semua
+            </x-button>
             <x-button variant="success" icon="fas fa-file-excel" wire:click="exportData" title="Export ke Excel">
                 Export
             </x-button>
@@ -293,6 +296,15 @@
         on-confirm="delete" on-cancel="cancelDelete" variant="danger" icon="fas fa-exclamation-triangle">
         <x-slot:confirmButton>
             <i class="fas fa-trash-alt me-2"></i>Hapus
+        </x-slot:confirmButton>
+    </x-confirm-modal>
+
+    {{-- Delete All Confirmation Modal --}}
+    <x-confirm-modal :show="$showDeleteAllModal" title="Peringatan Keras: Hapus Semua Data!"
+        message="PERHATIAN! Anda akan menghapus SELURUH data penjualan beserta riwayat prediksinya. Data yang sudah dihapus tidak dapat dikembalikan. Lanjutkan?"
+        on-confirm="deleteAll" on-cancel="cancelDeleteAll" variant="danger" icon="fas fa-radiation">
+        <x-slot:confirmButton>
+            <i class="fas fa-skull-crossbones me-2"></i>Ya, Hapus Semua
         </x-slot:confirmButton>
     </x-confirm-modal>
 
