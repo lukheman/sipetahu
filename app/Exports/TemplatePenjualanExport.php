@@ -2,40 +2,46 @@
 
 namespace App\Exports;
 
+use App\Models\Produk;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class TemplatePenjualanExport implements FromArray, WithHeadings
 {
+    private $products;
+
+    public function __construct()
+    {
+        $this->products = Produk::orderBy('id_produk')->get();
+    }
+
     public function headings(): array
     {
         return [
             'Tanggal',
-            'Produksi Tahu Kecil',
-            'Produksi Tahu Besar',
-            'Total Produksi',
-            'Penjualan Tahu Kecil',
-            'Penjualan Tahu Besar',
-            'Total Penjualan',
-            'Tahu Kembali Kecil',
-            'Tahu Kembali Besar'
+            'Jenis Pembeli',
+            'Distributor',
+            'Nama Produk',
+            'Produksi',
+            'Penjualan'
         ];
     }
 
     public function array(): array
     {
-        return [
-            [
+        $rows = [];
+        
+        foreach ($this->products as $product) {
+            $rows[] = [
                 '2025-01-01',
-                7056,
-                6912,
-                13968,
-                6624,
-                5616,
-                12240,
-                432,
-                1296
-            ]
-        ];
+                'Langsung',
+                '',
+                $product->nama_produk,
+                500,
+                450
+            ];
+        }
+
+        return $rows;
     }
 }

@@ -39,14 +39,28 @@
             <x-slot:content>
                 <div class="tab-pane fade show active" id="harian" role="tabpanel" aria-labelledby="harian-tab">
                     {{-- Search and Filters --}}
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <h5 class="mb-0" style="color: var(--text-primary); font-weight: 600;">Semua Data Penjualan</h5>
-            <div class="input-group" style="max-width: 300px;">
-                <span class="input-group-text" style="background: var(--input-bg); border-color: var(--border-color);">
-                    <i class="fas fa-search" style="color: var(--text-muted);"></i>
-                </span>
-                <input type="text" class="form-control" placeholder="Cari tahun..."
-                    wire:model.live.debounce.300ms="search" style="border-left: none;">
+            <div class="d-flex flex-column flex-md-row gap-2">
+                <select class="form-select" wire:model.live="filter_produk" style="min-width: 150px; border-radius: 8px;">
+                    <option value="">Semua Produk</option>
+                    @foreach($this->products as $product)
+                        <option value="{{ $product->id_produk }}">{{ $product->nama_produk }}</option>
+                    @endforeach
+                </select>
+
+                <select class="form-select" wire:model.live="sort_tanggal" style="min-width: 150px; border-radius: 8px;">
+                    <option value="desc">Terbaru</option>
+                    <option value="asc">Terlama</option>
+                </select>
+
+                <div class="input-group" style="max-width: 300px;">
+                    <span class="input-group-text" style="background: var(--input-bg); border-color: var(--border-color); border-radius: 8px 0 0 8px;">
+                        <i class="fas fa-search" style="color: var(--text-muted);"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Cari tahun..."
+                        wire:model.live.debounce.300ms="search" style="border-left: none; border-radius: 0 8px 8px 0;">
+                </div>
             </div>
         </div>
 
@@ -57,46 +71,90 @@
                     <tr>
                         <th>Tanggal</th>
                         <th>Pembeli</th>
-                        <th>Produksi Tahu Kecil</th>
-                        <th>Produksi Tahu Besar</th>
-                        <th>Penjualan Tahu Kecil</th>
-                        <th>Penjualan Tahu Besar</th>
+                        <th>Nama Produk</th>
+                        <th>Produksi</th>
+                        <th>Penjualan</th>
                         <th style="width: 120px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($records as $record)
-                        <tr wire:key="record-{{ $record->id_data_penjualan }}">
-                            <td>
-                                {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
-                            </td>
-                            <td>
-                                @if($record->jenis_pembeli === 'distributor')
-                                    <span class="badge bg-primary">Distributor: {{ $record->distributor?->nama_distributor }}</span>
-                                @else
-                                    <span class="badge bg-secondary">Langsung</span>
-                                @endif
-                            </td>
-                            <td>{{ number_format($record->produksi_tahu_kecil, 0, ',', '.') }}</td>
-                            <td>{{ number_format($record->produksi_tahu_besar, 0, ',', '.') }}</td>
-                            <td>{{ number_format($record->penjualan_tahu_kecil, 0, ',', '.') }}</td>
-                            <td>{{ number_format($record->penjualan_tahu_besar, 0, ',', '.') }}</td>
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <x-button
-                                        wire:click="openEditModal({{ $record->id_data_penjualan }})" title="Edit data">
-                                        <i class="fas fa-edit"></i>
-                                    </x-button>
-                                    <x-button variant="danger"
-                                        wire:click="confirmDelete({{ $record->id_data_penjualan }})" title="Hapus data">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </x-button>
-                                </div>
-                            </td>
-                        </tr>
+                        @php
+                            $details = $record->detailPenjualans;
+                            if ($filter_produk) {
+                                $details = $details->where('id_produk', $filter_produk)->values();
+                            }
+                            $detailsCount = max(1, $details->count());
+                        @endphp
+                        
+                        @if ($details->isEmpty())
+                            <tr wire:key="record-{{ $record->id_data_penjualan }}">
+                                <td class="align-middle">
+                                    {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
+                                </td>
+                                <td class="align-middle">
+                                    @if($record->jenis_pembeli === 'distributor')
+                                        <span class="badge bg-primary">Distributor: {{ $record->distributor?->nama_distributor }}</span>
+                                    @else
+                                        <span class="badge bg-secondary">Langsung</span>
+                                    @endif
+                                </td>
+                                <td class="align-middle text-muted">-</td>
+                                <td class="align-middle text-muted">-</td>
+                                <td class="align-middle text-muted">-</td>
+                                <td class="align-middle">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <x-button
+                                            wire:click="openEditModal({{ $record->id_data_penjualan }})" title="Edit data">
+                                            <i class="fas fa-edit"></i>
+                                        </x-button>
+                                        <x-button variant="danger"
+                                            wire:click="confirmDelete({{ $record->id_data_penjualan }})" title="Hapus data">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </x-button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @else
+                            @foreach ($details as $index => $detail)
+                                <tr wire:key="record-{{ $record->id_data_penjualan }}-{{ $index }}">
+                                    @if ($index === 0)
+                                        <td rowspan="{{ $detailsCount }}" class="align-middle border-end">
+                                            {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
+                                        </td>
+                                        <td rowspan="{{ $detailsCount }}" class="align-middle border-end">
+                                            @if($record->jenis_pembeli === 'distributor')
+                                                <span class="badge bg-primary">Distributor: {{ $record->distributor?->nama_distributor }}</span>
+                                            @else
+                                                <span class="badge bg-secondary">Langsung</span>
+                                            @endif
+                                        </td>
+                                    @endif
+                                    
+                                    <td class="align-middle">{{ $detail->produk->nama_produk ?? '-' }}</td>
+                                    <td class="align-middle">{{ number_format($detail->produksi, 0, ',', '.') }}</td>
+                                    <td class="align-middle border-end">{{ number_format($detail->penjualan, 0, ',', '.') }}</td>
+                                    
+                                    @if ($index === 0)
+                                        <td rowspan="{{ $detailsCount }}" class="align-middle">
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <x-button
+                                                    wire:click="openEditModal({{ $record->id_data_penjualan }})" title="Edit data">
+                                                    <i class="fas fa-edit"></i>
+                                                </x-button>
+                                                <x-button variant="danger"
+                                                    wire:click="confirmDelete({{ $record->id_data_penjualan }})" title="Hapus data">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </x-button>
+                                            </div>
+                                        </td>
+                                    @endif
+                                </tr>
+                            @endforeach
+                        @endif
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-4">
+                            <td colspan="6" class="text-center py-4">
                                 <div class="text-muted">
                                     <i class="fas fa-box-open mb-2" style="font-size: 2rem;"></i>
                                     <p class="mb-0">Tidak ada data ditemukan</p>
@@ -176,66 +234,43 @@
 
                         @if($jenis_pembeli === 'distributor')
                             <div class="col-md-12 mb-3">
-                                <label for="id_distributor" class="form-label">Pilih Distributor <span style="color: var(--danger-color);">*</span></label>
-                                <select class="form-select @error('id_distributor') is-invalid @enderror" id="id_distributor" wire:model="id_distributor">
-                                    <option value="">-- Pilih Distributor --</option>
-                                    @foreach($distributors as $dist)
-                                        <option value="{{ $dist->id_distributor }}">{{ $dist->nama_distributor }}</option>
-                                    @endforeach
-                                </select>
-                                @error('id_distributor') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <x-select 
+                                    label="Pilih Distributor" 
+                                    wire:model="id_distributor" 
+                                    :options="$distributors->pluck('nama_distributor', 'id_distributor')->toArray()" 
+                                    placeholder="-- Pilih Distributor --"
+                                    required
+                                />
                             </div>
                         @endif
 
                         <div class="col-md-12 mb-3">
-                            <label for="tanggal" class="form-label">Tanggal <span style="color: var(--danger-color);">*</span></label>
-                            <input type="date" class="form-control @error('tanggal') is-invalid @enderror" id="tanggal" wire:model="tanggal">
-                            @error('tanggal') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="produksi_tahu_kecil" class="form-label">Produksi Tahu Kecil <span style="color: var(--danger-color);">*</span></label>
-                            <input type="number" class="form-control @error('produksi_tahu_kecil') is-invalid @enderror" id="produksi_tahu_kecil" wire:model="produksi_tahu_kecil">
-                            @error('produksi_tahu_kecil') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="produksi_tahu_besar" class="form-label">Produksi Tahu Besar <span style="color: var(--danger-color);">*</span></label>
-                            <input type="number" class="form-control @error('produksi_tahu_besar') is-invalid @enderror" id="produksi_tahu_besar" wire:model="produksi_tahu_besar">
-                            @error('produksi_tahu_besar') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <x-input type="date" label="Tanggal" wire:model="tanggal" required />
                         </div>
 
                         <div class="col-md-12 mb-3">
-                            <label for="total_produksi" class="form-label">Total Produksi <span style="color: var(--danger-color);">*</span></label>
-                            <input type="number" class="form-control @error('total_produksi') is-invalid @enderror" id="total_produksi" wire:model="total_produksi">
-                            @error('total_produksi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <h6 class="border-bottom pb-2">Data Produksi & Penjualan Per Produk</h6>
+                        </div>
+
+                        @foreach($this->products as $product)
+                            <div class="col-12 mb-2"><strong style="color: var(--primary-color);">{{ $product->nama_produk }}</strong></div>
+                            <div class="col-md-6 mb-3">
+                                <x-input type="number" label="Produksi" wire:model="details.{{ $product->id_produk }}.produksi" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <x-input type="number" label="Penjualan" wire:model="details.{{ $product->id_produk }}.penjualan" required />
+                            </div>
+                        @endforeach
+
+                        <div class="col-md-12 mt-3 mb-2">
+                            <h6 class="border-bottom pb-2">Total (Keseluruhan)</h6>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="penjualan_tahu_kecil" class="form-label">Penjualan Tahu Kecil <span style="color: var(--danger-color);">*</span></label>
-                            <input type="number" class="form-control @error('penjualan_tahu_kecil') is-invalid @enderror" id="penjualan_tahu_kecil" wire:model="penjualan_tahu_kecil">
-                            @error('penjualan_tahu_kecil') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <x-input type="number" label="Total Produksi" wire:model="total_produksi" required />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="penjualan_tahu_besar" class="form-label">Penjualan Tahu Besar <span style="color: var(--danger-color);">*</span></label>
-                            <input type="number" class="form-control @error('penjualan_tahu_besar') is-invalid @enderror" id="penjualan_tahu_besar" wire:model="penjualan_tahu_besar">
-                            @error('penjualan_tahu_besar') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-                            <label for="total_penjualan" class="form-label">Total Penjualan <span style="color: var(--danger-color);">*</span></label>
-                            <input type="number" class="form-control @error('total_penjualan') is-invalid @enderror" id="total_penjualan" wire:model="total_penjualan">
-                            @error('total_penjualan') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="tahu_kembali_kecil" class="form-label">Tahu Kembali Kecil <span style="color: var(--danger-color);">*</span></label>
-                            <input type="number" class="form-control @error('tahu_kembali_kecil') is-invalid @enderror" id="tahu_kembali_kecil" wire:model="tahu_kembali_kecil">
-                            @error('tahu_kembali_kecil') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <label for="tahu_kembali_besar" class="form-label">Tahu Kembali Besar <span style="color: var(--danger-color);">*</span></label>
-                            <input type="number" class="form-control @error('tahu_kembali_besar') is-invalid @enderror" id="tahu_kembali_besar" wire:model="tahu_kembali_besar">
-                            @error('tahu_kembali_besar') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <x-input type="number" label="Total Penjualan" wire:model="total_penjualan" required />
                         </div>
                     </div>
 

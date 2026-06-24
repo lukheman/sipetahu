@@ -32,22 +32,33 @@ class LaporanPenjualan extends Component
             $query->whereBetween('tanggal', [$this->start_date, $this->end_date]);
         }
 
-        $records = $query->orderBy('tanggal', 'asc')->get();
+        $records = $query->orderBy('tanggal', 'asc')->with('detailPenjualans.produk')->get();
+        $products = \App\Models\Produk::orderBy('id_produk')->get();
 
         $summary = [
-            'produksi_kecil' => $records->sum('produksi_tahu_kecil'),
-            'produksi_besar' => $records->sum('produksi_tahu_besar'),
             'total_produksi' => $records->sum('total_produksi'),
-            'penjualan_kecil' => $records->sum('penjualan_tahu_kecil'),
-            'penjualan_besar' => $records->sum('penjualan_tahu_besar'),
             'total_penjualan' => $records->sum('total_penjualan'),
-            'kembali_kecil' => $records->sum('tahu_kembali_kecil'),
-            'kembali_besar' => $records->sum('tahu_kembali_besar'),
+            'products' => []
         ];
+
+        foreach ($products as $product) {
+            $summary['products'][$product->id_produk] = [
+                'produksi' => 0,
+                'penjualan' => 0,
+            ];
+            foreach ($records as $record) {
+                $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk);
+                if ($detail) {
+                    $summary['products'][$product->id_produk]['produksi'] += $detail->produksi;
+                    $summary['products'][$product->id_produk]['penjualan'] += $detail->penjualan;
+                }
+            }
+        }
 
         $pdf = Pdf::loadView('pdf.laporan-penjualan', [
             'records' => $records,
             'summary' => $summary,
+            'products' => $products,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
         ]);
@@ -65,31 +76,33 @@ class LaporanPenjualan extends Component
             $query->whereBetween('tanggal', [$this->start_date, $this->end_date]);
         }
 
-        $records = $query->orderBy('tanggal', 'desc')->get();
+        $records = $query->orderBy('tanggal', 'desc')->with('detailPenjualans.produk')->get();
+        $products = \App\Models\Produk::orderBy('id_produk')->get();
 
-        $total_produksi_kecil = $records->sum('produksi_tahu_kecil');
-        $total_produksi_besar = $records->sum('produksi_tahu_besar');
-        $total_produksi = $records->sum('total_produksi');
-        
-        $total_penjualan_kecil = $records->sum('penjualan_tahu_kecil');
-        $total_penjualan_besar = $records->sum('penjualan_tahu_besar');
-        $total_penjualan = $records->sum('total_penjualan');
+        $summary = [
+            'total_produksi' => $records->sum('total_produksi'),
+            'total_penjualan' => $records->sum('total_penjualan'),
+            'products' => []
+        ];
 
-        $total_kembali_kecil = $records->sum('tahu_kembali_kecil');
-        $total_kembali_besar = $records->sum('tahu_kembali_besar');
+        foreach ($products as $product) {
+            $summary['products'][$product->id_produk] = [
+                'produksi' => 0,
+                'penjualan' => 0,
+            ];
+            foreach ($records as $record) {
+                $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk);
+                if ($detail) {
+                    $summary['products'][$product->id_produk]['produksi'] += $detail->produksi;
+                    $summary['products'][$product->id_produk]['penjualan'] += $detail->penjualan;
+                }
+            }
+        }
 
         return view('livewire.admin.laporan-penjualan', [
             'records' => $records,
-            'summary' => [
-                'produksi_kecil' => $total_produksi_kecil,
-                'produksi_besar' => $total_produksi_besar,
-                'total_produksi' => $total_produksi,
-                'penjualan_kecil' => $total_penjualan_kecil,
-                'penjualan_besar' => $total_penjualan_besar,
-                'total_penjualan' => $total_penjualan,
-                'kembali_kecil' => $total_kembali_kecil,
-                'kembali_besar' => $total_kembali_besar,
-            ]
+            'products' => $products,
+            'summary' => $summary
         ]);
     }
 }

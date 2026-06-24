@@ -22,6 +22,8 @@ class DataPenjualanImport implements ToCollection
         $headerRow = $rows->first()->toArray();
         $columnMap = $this->buildColumnMap($headerRow);
 
+        $products = \App\Models\Produk::all();
+
         // Process data rows (skip header)
         foreach ($rows->skip(1) as $row) {
             $rowArray = $row->toArray();
@@ -31,19 +33,55 @@ class DataPenjualanImport implements ToCollection
                 continue;
             }
 
-            DataPenjualan::updateOrCreate(
+            $jenis_pembeli = $this->getVal($rowArray, $columnMap, 'jenis_pembeli');
+            $jenis_pembeli = $jenis_pembeli ? strtolower(trim($jenis_pembeli)) : 'langsung';
+
+            $distributor_name = $this->getVal($rowArray, $columnMap, 'distributor');
+            $id_distributor = null;
+            if ($jenis_pembeli === 'distributor' && $distributor_name) {
+                $dist = \App\Models\Distributor::where('nama_distributor', 'like', "%{$distributor_name}%")->first();
+                $id_distributor = $dist ? $dist->id_distributor : null;
+            }
+
+            $record = DataPenjualan::firstOrCreate(
                 ['tanggal' => $tanggal],
                 [
-                    'produksi_tahu_kecil' => $this->toInt($this->getVal($rowArray, $columnMap, 'produksi_tahu_kecil')),
-                    'produksi_tahu_besar' => $this->toInt($this->getVal($rowArray, $columnMap, 'produksi_tahu_besar')),
-                    'total_produksi' => $this->toInt($this->getVal($rowArray, $columnMap, 'total_produksi')),
-                    'penjualan_tahu_kecil' => $this->toInt($this->getVal($rowArray, $columnMap, 'penjualan_tahu_kecil')),
-                    'penjualan_tahu_besar' => $this->toInt($this->getVal($rowArray, $columnMap, 'penjualan_tahu_besar')),
-                    'total_penjualan' => $this->toInt($this->getVal($rowArray, $columnMap, 'total_penjualan')),
-                    'tahu_kembali_kecil' => $this->toInt($this->getVal($rowArray, $columnMap, 'tahu_kembali_kecil')),
-                    'tahu_kembali_besar' => $this->toInt($this->getVal($rowArray, $columnMap, 'tahu_kembali_besar')),
+                    'jenis_pembeli' => $jenis_pembeli,
+                    'id_distributor' => $id_distributor,
+                    'total_produksi' => 0,
+                    'total_penjualan' => 0,
                 ]
             );
+
+            // Update if empty
+            if ($record->jenis_pembeli === 'langsung' && $jenis_pembeli === 'distributor') {
+                $record->update([
+                    'jenis_pembeli' => $jenis_pembeli,
+                    'id_distributor' => $id_distributor,
+                ]);
+            }
+
+            $nama_produk = $this->getVal($rowArray, $columnMap, 'nama_produk');
+            if ($nama_produk) {
+                $product = \App\Models\Produk::where('nama_produk', 'like', "%{$nama_produk}%")->first();
+                if ($product) {
+                    $produksi = $this->toInt($this->getVal($rowArray, $columnMap, 'produksi'));
+                    $penjualan = $this->toInt($this->getVal($rowArray, $columnMap, 'penjualan'));
+
+                    $record->detailPenjualans()->updateOrCreate(
+                        ['id_produk' => $product->id_produk],
+                        [
+                            'produksi' => $produksi,
+                            'penjualan' => $penjualan,
+                        ]
+                    );
+
+                    $record->update([
+                        'total_produksi' => $record->detailPenjualans()->sum('produksi'),
+                        'total_penjualan' => $record->detailPenjualans()->sum('penjualan'),
+                    ]);
+                }
+            }
 
             $this->importedCount++;
         }

@@ -80,61 +80,69 @@
         <p>Periode: {{ \Carbon\Carbon::parse($start_date)->format('d F Y') }} s/d {{ \Carbon\Carbon::parse($end_date)->format('d F Y') }}</p>
     </div>
 
-    <table class="summary-box">
-        <tr>
-            <td>
-                <span class="summary-title">Total Produksi</span>
-                <span class="summary-value">{{ number_format($summary['total_produksi'], 0, ',', '.') }}</span><br>
-                <small>Kecil: {{ number_format($summary['produksi_kecil'], 0, ',', '.') }} | Besar: {{ number_format($summary['produksi_besar'], 0, ',', '.') }}</small>
-            </td>
-            <td>
-                <span class="summary-title">Total Penjualan</span>
-                <span class="summary-value">{{ number_format($summary['total_penjualan'], 0, ',', '.') }}</span><br>
-                <small>Kecil: {{ number_format($summary['penjualan_kecil'], 0, ',', '.') }} | Besar: {{ number_format($summary['penjualan_besar'], 0, ',', '.') }}</small>
-            </td>
-            <td>
-                <span class="summary-title">Total Tahu Kembali</span>
-                <span class="summary-value">{{ number_format($summary['kembali_kecil'] + $summary['kembali_besar'], 0, ',', '.') }}</span><br>
-                <small>Kecil: {{ number_format($summary['kembali_kecil'], 0, ',', '.') }} | Besar: {{ number_format($summary['kembali_besar'], 0, ',', '.') }}</small>
-            </td>
-        </tr>
-    </table>
+    <div class="summary-section">
+        <div class="summary-box">
+            <div class="summary-title">Total Produksi</div>
+            <div class="summary-value">{{ number_format($summary['total_produksi'], 0, ',', '.') }}</div>
+            <div class="summary-detail">
+                @foreach($products as $product)
+                    {{ $product->nama_produk }}: {{ number_format($summary['products'][$product->id_produk]['produksi'] ?? 0, 0, ',', '.') }}<br>
+                @endforeach
+            </div>
+        </div>
+        
+        <div class="summary-box">
+            <div class="summary-title">Total Penjualan</div>
+            <div class="summary-value">{{ number_format($summary['total_penjualan'], 0, ',', '.') }}</div>
+            <div class="summary-detail">
+                @foreach($products as $product)
+                    {{ $product->nama_produk }}: {{ number_format($summary['products'][$product->id_produk]['penjualan'] ?? 0, 0, ',', '.') }}<br>
+                @endforeach
+            </div>
+        </div>
+    </div>
 
     <table class="data-table">
         <thead>
             <tr>
                 <th rowspan="2">Tanggal</th>
-                <th colspan="3">Produksi Tahu</th>
-                <th colspan="3">Penjualan Tahu</th>
-                <th colspan="2">Tahu Kembali</th>
+                <th colspan="{{ $products->count() + 1 }}">Produksi Tahu</th>
+                <th colspan="{{ $products->count() + 1 }}">Penjualan Tahu</th>
             </tr>
             <tr>
-                <th>Kecil</th>
-                <th>Besar</th>
+                @foreach($products as $product)
+                    <th>{{ $product->nama_produk }}</th>
+                @endforeach
                 <th>Total</th>
-                <th>Kecil</th>
-                <th>Besar</th>
+
+                @foreach($products as $product)
+                    <th>{{ $product->nama_produk }}</th>
+                @endforeach
                 <th>Total</th>
-                <th>Kecil</th>
-                <th>Besar</th>
             </tr>
         </thead>
         <tbody>
             @forelse($records as $record)
             <tr>
-                <td class="text-start">{{ \Carbon\Carbon::parse($record->tanggal)->format('d/m/Y') }}</td>
-                <td>{{ number_format($record->produksi_tahu_kecil, 0, ',', '.') }}</td>
-                <td>{{ number_format($record->produksi_tahu_besar, 0, ',', '.') }}</td>
-                <td style="font-weight: bold; background-color: #f4f4f4;">{{ number_format($record->total_produksi, 0, ',', '.') }}</td>
-                <td>{{ number_format($record->penjualan_tahu_kecil, 0, ',', '.') }}</td>
-                <td>{{ number_format($record->penjualan_tahu_besar, 0, ',', '.') }}</td>
-                <td style="font-weight: bold; background-color: #eef9ee;">{{ number_format($record->total_penjualan, 0, ',', '.') }}</td>
-                <td>{{ number_format($record->tahu_kembali_kecil, 0, ',', '.') }}</td>
-                <td>{{ number_format($record->tahu_kembali_besar, 0, ',', '.') }}</td>
+                <td>{{ \Carbon\Carbon::parse($record->tanggal)->format('d/m/Y') }}</td>
+                
+                @foreach($products as $product)
+                    @php $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk); @endphp
+                    <td>{{ number_format($detail?->produksi ?? 0, 0, ',', '.') }}</td>
+                @endforeach
+                <td class="total-column">{{ number_format($record->total_produksi, 0, ',', '.') }}</td>
+                
+                @foreach($products as $product)
+                    @php $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk); @endphp
+                    <td>{{ number_format($detail?->penjualan ?? 0, 0, ',', '.') }}</td>
+                @endforeach
+                <td class="total-column">{{ number_format($record->total_penjualan, 0, ',', '.') }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="9">Tidak ada data penjualan pada rentang tanggal ini.</td>
+                <td colspan="{{ 1 + ($products->count() * 2) + 2 }}" style="text-align: center; padding: 20px;">
+                    Tidak ada data penjualan pada rentang tanggal ini.
+                </td>
             </tr>
             @endforelse
         </tbody>

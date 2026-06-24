@@ -14,15 +14,14 @@ class DataPenjualan extends Model
         'tanggal',
         'jenis_pembeli',
         'id_distributor',
-        'produksi_tahu_kecil',
-        'produksi_tahu_besar',
         'total_produksi',
-        'penjualan_tahu_kecil',
-        'penjualan_tahu_besar',
         'total_penjualan',
-        'tahu_kembali_kecil',
-        'tahu_kembali_besar'
     ];
+
+    public function detailPenjualans()
+    {
+        return $this->hasMany(DetailPenjualan::class, 'id_data_penjualan', 'id_data_penjualan');
+    }
 
     public function distributor()
     {
@@ -38,6 +37,8 @@ class DataPenjualan extends Model
     {
         static::deleting(function ($dataPenjualan) {
             $dataPenjualan->hasilPrediksi()->delete();
+            $dataPenjualan->detailPenjualans()->delete();
         });
     }
+
 }

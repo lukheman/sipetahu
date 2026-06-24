@@ -13,7 +13,6 @@ return new class extends Migration {
         Schema::create('produk', function (Blueprint $table) {
             $table->id('id_produk');
             $table->string('nama_produk');
-            $table->enum('jenis_tahu', ['potongan besar', 'potongan kecil'])->nullable();
             $table->decimal('harga', 12, 2);
             $table->text('deskripsi')->nullable();
             $table->timestamps();

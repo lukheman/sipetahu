@@ -40,9 +40,7 @@
             <table class="table table-modern">
                 <thead>
                     <tr>
-                        <th style="width: 80px;">ID</th>
                         <th>Nama Produk</th>
-                        <th>Jenis Tahu</th>
                         <th>Harga</th>
                         <th>Deskripsi</th>
                         <th style="width: 120px;">Aksi</th>
@@ -51,19 +49,10 @@
                 <tbody>
                     @forelse ($records as $record)
                         <tr wire:key="record-{{ $record->id_produk }}">
-                            <td class="text-muted">#{{ $record->id_produk }}</td>
                             <td class="fw-semibold" style="color: var(--text-primary);">
-                                <span
-                                    class="badge {{ $record->nama_produk == 'Tahu' ? 'bg-warning text-dark' : 'bg-success text-white' }} px-2 py-1">
+                                <span class="badge bg-success text-white px-2 py-1">
                                     {{ $record->nama_produk }}
                                 </span>
-                            </td>
-                            <td>
-                                @if($record->jenis_tahu)
-                                    <span class="badge bg-info">{{ ucwords($record->jenis_tahu) }}</span>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
                             </td>
                             <td>Rp {{ number_format($record->harga, 0, ',', '.') }}</td>
                             <td class="text-muted">{{ \Illuminate\Support\Str::limit($record->deskripsi ?? '-', 50) }}</td>
@@ -119,32 +108,12 @@
                     <div class="mb-3">
                         <label for="nama_produk" class="form-label">Nama Produk <span
                                 style="color: var(--danger-color);">*</span></label>
-                        <select class="form-select @error('nama_produk') is-invalid @enderror" id="nama_produk"
-                            wire:model.live="nama_produk">
-                            <option value="">-- Pilih Produk --</option>
-                            <option value="Tahu">Tahu</option>
-                            <option value="Tempe">Tempe</option>
-                        </select>
+                        <input type="text" class="form-control @error('nama_produk') is-invalid @enderror" id="nama_produk"
+                            wire:model="nama_produk" placeholder="Contoh: Tahu Besar, Tahu Kecil, Tempe">
                         @error('nama_produk')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-
-                    @if($nama_produk === 'Tahu')
-                    <div class="mb-3">
-                        <label for="jenis_tahu" class="form-label">Jenis Tahu <span
-                                style="color: var(--danger-color);">*</span></label>
-                        <select class="form-select @error('jenis_tahu') is-invalid @enderror" id="jenis_tahu"
-                            wire:model="jenis_tahu">
-                            <option value="">-- Pilih Jenis Tahu --</option>
-                            <option value="potongan besar">Potongan Besar</option>
-                            <option value="potongan kecil">Potongan Kecil</option>
-                        </select>
-                        @error('jenis_tahu')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    @endif
 
                     <div class="mb-3">
                         <label for="harga" class="form-label">Harga <span

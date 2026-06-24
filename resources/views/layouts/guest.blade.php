@@ -445,7 +445,11 @@
         .auth-section {
             min-height: 100vh;
             padding-top: var(--nav-height);
-            background: var(--ink);
+            background-image:
+                linear-gradient(105deg, rgba(13,13,13,0.92) 0%, rgba(13,13,13,0.7) 50%, rgba(13,13,13,0.4) 100%),
+                url('/images/bg-tahu.png');
+            background-size: cover;
+            background-position: center;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -459,18 +463,14 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse at 15% 60%, rgba(200,241,53,0.07) 0%, transparent 55%),
-                radial-gradient(ellipse at 85% 20%, rgba(16,185,129,0.07) 0%, transparent 50%);
+                radial-gradient(ellipse at 15% 60%, rgba(200,241,53,0.15) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 20%, rgba(16,185,129,0.15) 0%, transparent 50%);
             pointer-events: none;
         }
 
         /* Animated bg shapes (kept for compat, now subtler) */
         .bg-shapes {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            z-index: 0;
-            pointer-events: none;
+            display: none;
         }
 
         .bg-shapes .shape {
@@ -880,15 +880,25 @@
         function initTheme() {
             const saved       = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (saved)            document.documentElement.setAttribute('data-theme', saved);
-            else if (prefersDark) document.documentElement.setAttribute('data-theme', 'dark');
+            
+            let themeToApply = 'light';
+            if (saved) {
+                themeToApply = saved;
+            } else if (prefersDark) {
+                themeToApply = 'dark';
+            }
+            
+            document.documentElement.setAttribute('data-theme', themeToApply);
+            document.documentElement.setAttribute('data-bs-theme', themeToApply);
             updateThemeIcon();
         }
 
         function toggleTheme() {
-            const current = document.documentElement.getAttribute('data-theme');
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
             const next    = current === 'dark' ? 'light' : 'dark';
+            
             document.documentElement.setAttribute('data-theme', next);
+            document.documentElement.setAttribute('data-bs-theme', next);
             localStorage.setItem('theme', next);
             updateThemeIcon();
         }

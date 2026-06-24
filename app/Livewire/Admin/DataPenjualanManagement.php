@@ -24,18 +24,17 @@ class DataPenjualanManagement extends Component
     #[Url(as: 'q')]
     public string $search = '';
 
+    #[Url(as: 'p')]
+    public string $filter_produk = '';
+
+    #[Url(as: 's')]
+    public string $sort_tanggal = 'desc';
+
     // Form fields
     public string $tanggal = '';
     public string $jenis_pembeli = 'langsung';
     public ?int $id_distributor = null;
-    public int $produksi_tahu_kecil = 0;
-    public int $produksi_tahu_besar = 0;
-    public int $total_produksi = 0;
-    public int $penjualan_tahu_kecil = 0;
-    public int $penjualan_tahu_besar = 0;
-    public int $total_penjualan = 0;
-    public int $tahu_kembali_kecil = 0;
-    public int $tahu_kembali_besar = 0;
+    public array $details = [];
 
     // State
     public ?int $editingId = null;
@@ -61,6 +60,19 @@ class DataPenjualanManagement extends Component
     public function mount(): void
     {
         $this->tanggal = now()->format('Y-m-d');
+        $this->initializeDetails();
+    }
+
+    protected function initializeDetails(): void
+    {
+        $products = Produk::all();
+        $this->details = [];
+        foreach ($products as $product) {
+            $this->details[$product->id_produk] = [
+                'produksi' => 0,
+                'penjualan' => 0,
+            ];
+        }
     }
 
     protected function rules(): array
@@ -69,14 +81,10 @@ class DataPenjualanManagement extends Component
             'tanggal' => ['required', 'date'],
             'jenis_pembeli' => ['required', 'in:distributor,langsung'],
             'id_distributor' => ['nullable', 'exists:distributor,id_distributor', 'required_if:jenis_pembeli,distributor'],
-            'produksi_tahu_kecil' => ['required', 'integer', 'min:0'],
-            'produksi_tahu_besar' => ['required', 'integer', 'min:0'],
             'total_produksi' => ['required', 'integer', 'min:0'],
-            'penjualan_tahu_kecil' => ['required', 'integer', 'min:0'],
-            'penjualan_tahu_besar' => ['required', 'integer', 'min:0'],
             'total_penjualan' => ['required', 'integer', 'min:0'],
-            'tahu_kembali_kecil' => ['required', 'integer', 'min:0'],
-            'tahu_kembali_besar' => ['required', 'integer', 'min:0'],
+            'details.*.produksi' => ['required', 'integer', 'min:0'],
+            'details.*.penjualan' => ['required', 'integer', 'min:0'],
         ];
     }
 
@@ -95,6 +103,16 @@ class DataPenjualanManagement extends Component
         $this->resetPage();
     }
 
+    public function updatedFilterProduk(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSortTanggal(): void
+    {
+        $this->resetPage();
+    }
+
     public function openCreateModal(): void
     {
         $this->resetForm();
@@ -104,19 +122,22 @@ class DataPenjualanManagement extends Component
 
     public function openEditModal(int $id): void
     {
-        $record = DataPenjualan::findOrFail($id);
+        $this->resetForm();
+        $record = DataPenjualan::with('detailPenjualans')->findOrFail($id);
         $this->editingId = $id;
         $this->tanggal = $record->tanggal;
         $this->jenis_pembeli = $record->jenis_pembeli;
         $this->id_distributor = $record->id_distributor;
-        $this->produksi_tahu_kecil = $record->produksi_tahu_kecil;
-        $this->produksi_tahu_besar = $record->produksi_tahu_besar;
         $this->total_produksi = $record->total_produksi;
-        $this->penjualan_tahu_kecil = $record->penjualan_tahu_kecil;
-        $this->penjualan_tahu_besar = $record->penjualan_tahu_besar;
         $this->total_penjualan = $record->total_penjualan;
-        $this->tahu_kembali_kecil = $record->tahu_kembali_kecil;
-        $this->tahu_kembali_besar = $record->tahu_kembali_besar;
+
+        foreach ($record->detailPenjualans as $detail) {
+            $this->details[$detail->id_produk] = [
+                'produksi' => $detail->produksi,
+                'penjualan' => $detail->penjualan,
+            ];
+        }
+
         $this->showModal = true;
     }
 
@@ -130,10 +151,42 @@ class DataPenjualanManagement extends Component
 
         if ($this->editingId) {
             $record = DataPenjualan::findOrFail($this->editingId);
-            $record->update($validated);
+            $record->update([
+                'tanggal' => $validated['tanggal'],
+                'jenis_pembeli' => $validated['jenis_pembeli'],
+                'id_distributor' => $validated['id_distributor'],
+                'total_produksi' => $validated['total_produksi'],
+                'total_penjualan' => $validated['total_penjualan'],
+            ]);
+
+            foreach ($validated['details'] as $id_produk => $data) {
+                $record->detailPenjualans()->updateOrCreate(
+                    ['id_produk' => $id_produk],
+                    [
+                        'produksi' => $data['produksi'],
+                        'penjualan' => $data['penjualan'],
+                    ]
+                );
+            }
+
             session()->flash('success', 'Data penjualan berhasil diperbarui.');
         } else {
-            DataPenjualan::create($validated);
+            $record = DataPenjualan::create([
+                'tanggal' => $validated['tanggal'],
+                'jenis_pembeli' => $validated['jenis_pembeli'],
+                'id_distributor' => $validated['id_distributor'],
+                'total_produksi' => $validated['total_produksi'],
+                'total_penjualan' => $validated['total_penjualan'],
+            ]);
+
+            foreach ($validated['details'] as $id_produk => $data) {
+                $record->detailPenjualans()->create([
+                    'id_produk' => $id_produk,
+                    'produksi' => $data['produksi'],
+                    'penjualan' => $data['penjualan'],
+                ]);
+            }
+
             session()->flash('success', 'Data penjualan berhasil ditambahkan.');
         }
 
@@ -175,14 +228,9 @@ class DataPenjualanManagement extends Component
         $this->tanggal = now()->format('Y-m-d');
         $this->jenis_pembeli = 'langsung';
         $this->id_distributor = null;
-        $this->produksi_tahu_kecil = 0;
-        $this->produksi_tahu_besar = 0;
         $this->total_produksi = 0;
-        $this->penjualan_tahu_kecil = 0;
-        $this->penjualan_tahu_besar = 0;
         $this->total_penjualan = 0;
-        $this->tahu_kembali_kecil = 0;
-        $this->tahu_kembali_besar = 0;
+        $this->initializeDetails();
         $this->editingId = null;
     }
 
@@ -233,7 +281,13 @@ class DataPenjualanManagement extends Component
 
     public function exportData()
     {
-        return Excel::download(new DataPenjualanExport, 'data_penjualan.xlsx');
+        return Excel::download(new DataPenjualanExport($this->search, $this->filter_produk, $this->sort_tanggal), 'data_penjualan.xlsx');
+    }
+
+    #[\Livewire\Attributes\Computed]
+    public function products()
+    {
+        return Produk::orderBy('nama_produk')->get();
     }
 
     #[\Livewire\Attributes\Computed]
@@ -249,13 +303,18 @@ class DataPenjualanManagement extends Component
     public function render()
     {
         $records = DataPenjualan::query()
-            ->with('distributor')
+            ->with(['distributor', 'detailPenjualans.produk'])
             ->when(
                 $this->search,
                 fn($q) =>
                 $q->where('tanggal', 'like', '%' . $this->search . '%')
             )
-            ->orderBy('tanggal', 'desc')
+            ->when(
+                $this->filter_produk,
+                fn($q) => 
+                $q->whereHas('detailPenjualans', fn($dq) => $dq->where('id_produk', $this->filter_produk))
+            )
+            ->orderBy('tanggal', $this->sort_tanggal === 'asc' ? 'asc' : 'desc')
             ->paginate(10);
 
         $distributors = \App\Models\Distributor::orderBy('nama_distributor')->get();
