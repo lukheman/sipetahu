@@ -1,3 +1,4 @@
+@component('layouts.guest', ['type' => 'guest'])
 <div class="sitahu-landing">
 
     <!-- ===== HERO SECTION ===== -->
@@ -320,7 +321,7 @@
 
 </div>
 
-<x-slot:styles>
+@slot('styles')
 <style>
 /* ===== LANDING PAGE COMPONENT STYLES ===== */
 
@@ -1168,4 +1169,5 @@
     .btn-hero-cta, .btn-hero-ghost { justify-content: center; }
 }
 </style>
-</x-slot:styles>
+@endslot
+@endcomponent

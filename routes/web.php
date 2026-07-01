@@ -10,17 +10,17 @@ use App\Livewire\Admin\LaporanPenjualan;
 use App\Livewire\Admin\LaporanWma;
 use App\Livewire\Admin\ProdukManagement;
 use App\Livewire\Admin\PrediksiTahu;
-use App\Livewire\Auth\Login;
-use App\Livewire\Auth\Register;
-use App\Livewire\Guest\LandingPage;
 use App\Http\Controllers\Admin\LogoutController;
 
 // Guest Routes
-Route::get('/', LandingPage::class)->name('home');
+Route::view('/', 'landing')->name('home');
 
 // Auth Routes
-Route::get('/login', Login::class)->name('login');
-Route::get('/register', Register::class)->name('register');
+Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [App\Http\Controllers\AuthController::class, 'register']);
+Route::get('/daftar-pelanggan', \App\Livewire\Public\RegistrasiPelanggan::class)->name('registrasi-pelanggan');
 
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');

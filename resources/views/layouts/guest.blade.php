@@ -795,6 +795,7 @@
                 <li><a href="/#tentang" class="site-nav-link">Tentang</a></li>
                 <li><a href="/#fitur"   class="site-nav-link">Fitur</a></li>
                 <li><a href="/#metode"  class="site-nav-link">Metode</a></li>
+                <li><a href="{{ route('registrasi-pelanggan') }}" class="site-nav-link">Daftar Pelanggan</a></li>
             </ul>
 
             {{-- Actions --}}
@@ -848,10 +849,11 @@
                         <div class="footer-column">
                             <h4>Menu</h4>
                             <ul>
-                                <li><a href="#beranda">Beranda</a></li>
-                                <li><a href="#tentang">Tentang</a></li>
-                                <li><a href="#fitur">Fitur</a></li>
-                                <li><a href="#metode">Metode</a></li>
+                                <li><a href="/#beranda">Beranda</a></li>
+                                <li><a href="/#tentang">Tentang</a></li>
+                                <li><a href="/#fitur">Fitur</a></li>
+                                <li><a href="/#metode">Metode</a></li>
+                                <li><a href="{{ route('registrasi-pelanggan') }}">Daftar Pelanggan</a></li>
                             </ul>
                         </div>
                         <div class="footer-column">

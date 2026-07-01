@@ -1,3 +1,4 @@
+@component('layouts.guest', ['type' => 'auth'])
 <div class="login-container">
     <div class="login-card">
 
@@ -9,14 +10,16 @@
         </div>
 
         {{-- Login Form --}}
-        <form wire:submit="submit">
+        <form action="{{ route('login') }}" method="POST">
+            @csrf
 
             {{-- Email --}}
             <div class="form-floating position-relative">
                 <i class="fas fa-envelope input-icon"></i>
                 <input
                     type="email"
-                    wire:model="email"
+                    name="email"
+                    value="{{ old('email') }}"
                     class="form-control @error('email') is-invalid @enderror"
                     id="email"
                     placeholder="Alamat Email"
@@ -33,7 +36,7 @@
                 <i class="fas fa-lock input-icon"></i>
                 <input
                     type="password"
-                    wire:model="password"
+                    name="password"
                     class="form-control @error('password') is-invalid @enderror"
                     id="password"
                     placeholder="Password"
@@ -50,20 +53,15 @@
             {{-- Remember & Forgot --}}
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="form-check mb-0">
-                    <input class="form-check-input" type="checkbox" wire:model="remember" id="remember">
+                    <input class="form-check-input" type="checkbox" name="remember" id="remember">
                     <label class="form-check-label" for="remember">Ingat saya</label>
                 </div>
                 <a href="#" class="forgot-password">Lupa Password?</a>
             </div>
 
             {{-- Submit --}}
-            <button type="submit" class="btn-login" wire:loading.attr="disabled">
-                <span wire:loading.remove>
-                    Masuk <i class="fas fa-arrow-right"></i>
-                </span>
-                <span wire:loading>
-                    <i class="fas fa-spinner fa-spin me-2"></i> Memproses...
-                </span>
+            <button type="submit" class="btn-login">
+                Masuk <i class="fas fa-arrow-right"></i>
             </button>
 
         </form>
@@ -72,9 +70,6 @@
         <div class="divider"><span>atau</span></div>
 
         {{-- Back to home --}}
-        <!-- <div class="signup-link"> -->
-        <!--     Belum punya akun? <a href="{{ route('register') }}">Daftar Sekarang</a> -->
-        <!-- </div> -->
         <div class="signup-link mt-2">
             <a href="/" style="color: var(--text-mid); font-weight:400;">
                 <i class="fas fa-arrow-left" style="font-size:0.75rem;"></i>
@@ -85,7 +80,7 @@
     </div>
 </div>
 
-<x-slot:scripts>
+@slot('scripts')
 <script>
     function togglePassword() {
         const input = document.getElementById('password');
@@ -99,4 +94,5 @@
         }
     }
 </script>
-</x-slot:scripts>
+@endslot
+@endcomponent

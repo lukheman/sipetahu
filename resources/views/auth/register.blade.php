@@ -1,3 +1,4 @@
+@component('layouts.guest', ['type' => 'auth'])
 <div class="login-container">
     <div class="login-card">
         <!-- Brand Logo -->
@@ -8,12 +9,13 @@
         </div>
 
         <!-- Register Form -->
-        <form wire:submit="submit">
+        <form action="{{ route('register') }}" method="POST">
+            @csrf
+
             <!-- Name Field -->
             <div class="form-floating position-relative">
                 <i class="fas fa-user input-icon"></i>
-                <input type="text" wire:model="name" class="form-control @error('name') is-invalid @enderror" id="name"
-                    placeholder="Full Name" autofocus>
+                <input type="text" name="name" value="{{ old('name') }}" class="form-control @error('name') is-invalid @enderror" id="name" placeholder="Full Name" autofocus>
                 <label for="name">Full Name</label>
                 @error('name')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -23,8 +25,7 @@
             <!-- Email Field -->
             <div class="form-floating position-relative">
                 <i class="fas fa-envelope input-icon"></i>
-                <input type="email" wire:model="email" class="form-control @error('email') is-invalid @enderror"
-                    id="email" placeholder="Email Address">
+                <input type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" id="email" placeholder="Email Address">
                 <label for="email">Email Address</label>
                 @error('email')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -34,8 +35,7 @@
             <!-- Password Field -->
             <div class="form-floating position-relative">
                 <i class="fas fa-lock input-icon"></i>
-                <input type="password" wire:model="password"
-                    class="form-control @error('password') is-invalid @enderror" id="password" placeholder="Password">
+                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" id="password" placeholder="Password">
                 <label for="password">Password</label>
                 <button type="button" class="password-toggle" onclick="togglePassword('password', 'toggleIcon1')">
                     <i class="fas fa-eye" id="toggleIcon1"></i>
@@ -48,22 +48,18 @@
             <!-- Confirm Password Field -->
             <div class="form-floating position-relative">
                 <i class="fas fa-lock input-icon"></i>
-                <input type="password" wire:model="password_confirmation" class="form-control"
-                    id="password_confirmation" placeholder="Confirm Password">
+                <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Confirm Password">
                 <label for="password_confirmation">Confirm Password</label>
-                <button type="button" class="password-toggle"
-                    onclick="togglePassword('password_confirmation', 'toggleIcon2')">
+                <button type="button" class="password-toggle" onclick="togglePassword('password_confirmation', 'toggleIcon2')">
                     <i class="fas fa-eye" id="toggleIcon2"></i>
                 </button>
             </div>
 
             <!-- Terms and Conditions -->
             <div class="form-check mb-4">
-                <input class="form-check-input @error('agree_terms') is-invalid @enderror" type="checkbox"
-                    wire:model="agree_terms" id="agree_terms">
+                <input class="form-check-input @error('agree_terms') is-invalid @enderror" type="checkbox" name="agree_terms" id="agree_terms" {{ old('agree_terms') ? 'checked' : '' }}>
                 <label class="form-check-label" for="agree_terms">
-                    I agree to the <a href="#" class="forgot-password">Terms of Service</a> and <a href="#"
-                        class="forgot-password">Privacy Policy</a>
+                    I agree to the <a href="#" class="forgot-password">Terms of Service</a> and <a href="#" class="forgot-password">Privacy Policy</a>
                 </label>
                 @error('agree_terms')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -71,11 +67,8 @@
             </div>
 
             <!-- Register Button -->
-            <button type="submit" class="btn btn-login" wire:loading.attr="disabled">
-                <span wire:loading.remove>Create Account <i class="fas fa-arrow-right"></i></span>
-                <span wire:loading>
-                    <i class="fas fa-spinner fa-spin me-2"></i> Creating account...
-                </span>
+            <button type="submit" class="btn btn-login w-100">
+                Create Account <i class="fas fa-arrow-right ms-2"></i>
             </button>
         </form>
 
@@ -103,6 +96,7 @@
     </div>
 </div>
 
+@slot('scripts')
 <script>
     function togglePassword(inputId, iconId) {
         const input = document.getElementById(inputId);
@@ -116,3 +110,5 @@
         }
     }
 </script>
+@endslot
+@endcomponent
