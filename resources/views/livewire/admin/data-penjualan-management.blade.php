@@ -96,8 +96,8 @@
                                     {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
                                 </td>
                                 <td class="align-middle">
-                                    @if($record->jenis_pembeli === 'distributor')
-                                        <span class="badge bg-primary">Distributor: {{ $record->distributor?->nama_distributor }}</span>
+                                    @if($record->jenis_pembeli === 'pelanggan')
+                                        <span class="badge bg-primary">Pelanggan: {{ $record->pelanggan?->nama_pelanggan }}</span>
                                     @else
                                         <span class="badge bg-secondary">Langsung</span>
                                     @endif
@@ -126,8 +126,8 @@
                                             {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
                                         </td>
                                         <td rowspan="{{ $detailsCount }}" class="align-middle border-end">
-                                            @if($record->jenis_pembeli === 'distributor')
-                                                <span class="badge bg-primary">Distributor: {{ $record->distributor?->nama_distributor }}</span>
+                                            @if($record->jenis_pembeli === 'pelanggan')
+                                                <span class="badge bg-primary">Pelanggan: {{ $record->pelanggan?->nama_pelanggan }}</span>
                                             @else
                                                 <span class="badge bg-secondary">Langsung</span>
                                             @endif
@@ -236,20 +236,20 @@
                                     <label class="form-check-label" for="pembeli_langsung">Datang Langsung (Pembeli Biasa)</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="jenis_pembeli" id="pembeli_distributor" value="distributor" wire:model.live="jenis_pembeli">
-                                    <label class="form-check-label" for="pembeli_distributor">Distributor</label>
+                                    <input class="form-check-input" type="radio" name="jenis_pembeli" id="pembeli_pelanggan" value="pelanggan" wire:model.live="jenis_pembeli">
+                                    <label class="form-check-label" for="pembeli_pelanggan">Pelanggan</label>
                                 </div>
                             </div>
                             @error('jenis_pembeli') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
 
-                        @if($jenis_pembeli === 'distributor')
+                        @if($jenis_pembeli === 'pelanggan')
                             <div class="col-md-12 mb-3">
                                 <x-select 
-                                    label="Pilih Distributor" 
-                                    wire:model="id_distributor" 
-                                    :options="$distributors->pluck('nama_distributor', 'id_distributor')->toArray()" 
-                                    placeholder="-- Pilih Distributor --"
+                                    label="Pilih Pelanggan" 
+                                    wire:model="id_pelanggan" 
+                                    :options="$pelanggans->pluck('nama_pelanggan', 'id_pelanggan')->toArray()" 
+                                    placeholder="-- Pilih Pelanggan --"
                                     required
                                 />
                             </div>

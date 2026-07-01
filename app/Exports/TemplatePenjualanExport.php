@@ -20,7 +20,7 @@ class TemplatePenjualanExport implements FromArray, WithHeadings
         return [
             'Tanggal',
             'Jenis Pembeli',
-            'Distributor',
+            'Pelanggan',
             'Nama Produk',
             'Produksi',
             'Penjualan'

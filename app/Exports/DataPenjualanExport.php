@@ -22,7 +22,7 @@ class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
 
     public function collection()
     {
-        $query = DetailPenjualan::with(['dataPenjualan.distributor', 'produk'])
+        $query = DetailPenjualan::with(['dataPenjualan.pelanggan', 'produk'])
             ->join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
             ->select('detail_penjualan.*');
 
@@ -44,7 +44,7 @@ class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
         return [
             'Tanggal',
             'Jenis Pembeli',
-            'Distributor',
+            'Pelanggan',
             'Nama Produk',
             'Produksi',
             'Penjualan'
@@ -58,7 +58,7 @@ class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
         return [
             $dataPenjualan ? $dataPenjualan->tanggal : '',
             $dataPenjualan ? ucfirst($dataPenjualan->jenis_pembeli) : '',
-            ($dataPenjualan && $dataPenjualan->distributor) ? $dataPenjualan->distributor->nama_distributor : '-',
+            ($dataPenjualan && $dataPenjualan->pelanggan) ? $dataPenjualan->pelanggan->nama_pelanggan : '-',
             $detail->produk ? $detail->produk->nama_produk : '',
             $detail->produksi,
             $detail->penjualan,

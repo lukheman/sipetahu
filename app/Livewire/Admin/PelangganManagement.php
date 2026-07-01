@@ -2,27 +2,27 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Distributor;
+use App\Models\Pelanggan;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Title('Manajemen Distributor')]
-class DistributorManagement extends Component
+#[Title('Manajemen Pelanggan')]
+class PelangganManagement extends Component
 {
     use WithPagination;
 
     public $search = '';
     
-    public $distributorId;
-    public $nama_distributor = '';
+    public $pelangganId;
+    public $nama_pelanggan = '';
     public $no_hp = '';
     public $alamat = '';
 
     public $isEditMode = false;
 
     protected $rules = [
-        'nama_distributor' => 'required|string|max:255',
+        'nama_pelanggan' => 'required|string|max:255',
         'no_hp' => 'nullable|string|max:20',
         'alamat' => 'nullable|string',
     ];
@@ -34,8 +34,8 @@ class DistributorManagement extends Component
 
     public function resetInputFields()
     {
-        $this->distributorId = null;
-        $this->nama_distributor = '';
+        $this->pelangganId = null;
+        $this->nama_pelanggan = '';
         $this->no_hp = '';
         $this->alamat = '';
         $this->isEditMode = false;
@@ -47,13 +47,13 @@ class DistributorManagement extends Component
     {
         $this->validate();
 
-        Distributor::create([
-            'nama_distributor' => $this->nama_distributor,
+        Pelanggan::create([
+            'nama_pelanggan' => $this->nama_pelanggan,
             'no_hp' => $this->no_hp,
             'alamat' => $this->alamat,
         ]);
 
-        session()->flash('success', 'Distributor berhasil ditambahkan!');
+        session()->flash('success', 'Pelanggan berhasil ditambahkan!');
         $this->resetInputFields();
         $this->dispatch('close-modal');
     }
@@ -61,12 +61,12 @@ class DistributorManagement extends Component
     public function edit($id)
     {
         $this->resetInputFields();
-        $distributor = Distributor::findOrFail($id);
+        $pelanggan = Pelanggan::findOrFail($id);
         
-        $this->distributorId = $distributor->id_distributor;
-        $this->nama_distributor = $distributor->nama_distributor;
-        $this->no_hp = $distributor->no_hp;
-        $this->alamat = $distributor->alamat;
+        $this->pelangganId = $pelanggan->id_pelanggan;
+        $this->nama_pelanggan = $pelanggan->nama_pelanggan;
+        $this->no_hp = $pelanggan->no_hp;
+        $this->alamat = $pelanggan->alamat;
         
         $this->isEditMode = true;
     }
@@ -75,15 +75,15 @@ class DistributorManagement extends Component
     {
         $this->validate();
 
-        if ($this->distributorId) {
-            $distributor = Distributor::findOrFail($this->distributorId);
-            $distributor->update([
-                'nama_distributor' => $this->nama_distributor,
+        if ($this->pelangganId) {
+            $pelanggan = Pelanggan::findOrFail($this->pelangganId);
+            $pelanggan->update([
+                'nama_pelanggan' => $this->nama_pelanggan,
                 'no_hp' => $this->no_hp,
                 'alamat' => $this->alamat,
             ]);
 
-            session()->flash('success', 'Distributor berhasil diperbarui!');
+            session()->flash('success', 'Pelanggan berhasil diperbarui!');
             $this->resetInputFields();
             $this->dispatch('close-modal');
         }
@@ -91,18 +91,18 @@ class DistributorManagement extends Component
 
     public function delete($id)
     {
-        Distributor::findOrFail($id)->delete();
-        session()->flash('success', 'Distributor berhasil dihapus!');
+        Pelanggan::findOrFail($id)->delete();
+        session()->flash('success', 'Pelanggan berhasil dihapus!');
     }
 
     public function render()
     {
-        $distributors = Distributor::where('nama_distributor', 'like', '%' . $this->search . '%')
-            ->orderBy('id_distributor', 'desc')
+        $pelanggans = Pelanggan::where('nama_pelanggan', 'like', '%' . $this->search . '%')
+            ->orderBy('id_pelanggan', 'desc')
             ->paginate(10);
 
-        return view('livewire.admin.distributor-management', [
-            'distributors' => $distributors
+        return view('livewire.admin.pelanggan-management', [
+            'pelanggans' => $pelanggans
         ]);
     }
 }

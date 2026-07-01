@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('data_penjualan', function (Blueprint $table) {
-            $table->enum('jenis_pembeli', ['distributor', 'langsung'])->default('langsung')->after('tanggal');
-            $table->unsignedBigInteger('id_distributor')->nullable()->after('jenis_pembeli');
+            $table->enum('jenis_pembeli', ['pelanggan', 'langsung'])->default('langsung')->after('tanggal');
+            $table->unsignedBigInteger('id_pelanggan')->nullable()->after('jenis_pembeli');
             
-            $table->foreign('id_distributor')->references('id_distributor')->on('distributor')->onDelete('set null');
+            $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggan')->onDelete('set null');
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('data_penjualan', function (Blueprint $table) {
-            $table->dropForeign(['id_distributor']);
-            $table->dropColumn(['jenis_pembeli', 'id_distributor']);
+            $table->dropForeign(['id_pelanggan']);
+            $table->dropColumn(['jenis_pembeli', 'id_pelanggan']);
         });
     }
 };

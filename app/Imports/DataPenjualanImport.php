@@ -36,28 +36,28 @@ class DataPenjualanImport implements ToCollection
             $jenis_pembeli = $this->getVal($rowArray, $columnMap, 'jenis_pembeli');
             $jenis_pembeli = $jenis_pembeli ? strtolower(trim($jenis_pembeli)) : 'langsung';
 
-            $distributor_name = $this->getVal($rowArray, $columnMap, 'distributor');
-            $id_distributor = null;
-            if ($jenis_pembeli === 'distributor' && $distributor_name) {
-                $dist = \App\Models\Distributor::where('nama_distributor', 'like', "%{$distributor_name}%")->first();
-                $id_distributor = $dist ? $dist->id_distributor : null;
+            $pelanggan_name = $this->getVal($rowArray, $columnMap, 'pelanggan');
+            $id_pelanggan = null;
+            if ($jenis_pembeli === 'pelanggan' && $pelanggan_name) {
+                $dist = \App\Models\Pelanggan::where('nama_pelanggan', 'like', "%{$pelanggan_name}%")->first();
+                $id_pelanggan = $dist ? $dist->id_pelanggan : null;
             }
 
             $record = DataPenjualan::firstOrCreate(
                 ['tanggal' => $tanggal],
                 [
                     'jenis_pembeli' => $jenis_pembeli,
-                    'id_distributor' => $id_distributor,
+                    'id_pelanggan' => $id_pelanggan,
                     'total_produksi' => 0,
                     'total_penjualan' => 0,
                 ]
             );
 
             // Update if empty
-            if ($record->jenis_pembeli === 'langsung' && $jenis_pembeli === 'distributor') {
+            if ($record->jenis_pembeli === 'langsung' && $jenis_pembeli === 'pelanggan') {
                 $record->update([
                     'jenis_pembeli' => $jenis_pembeli,
-                    'id_distributor' => $id_distributor,
+                    'id_pelanggan' => $id_pelanggan,
                 ]);
             }
 

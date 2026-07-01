@@ -13,7 +13,7 @@ class DataPenjualan extends Model
     protected $fillable = [
         'tanggal',
         'jenis_pembeli',
-        'id_distributor',
+        'id_pelanggan',
         'total_produksi',
         'total_penjualan',
     ];
@@ -23,9 +23,9 @@ class DataPenjualan extends Model
         return $this->hasMany(DetailPenjualan::class, 'id_data_penjualan', 'id_data_penjualan');
     }
 
-    public function distributor()
+    public function pelanggan()
     {
-        return $this->belongsTo(Distributor::class, 'id_distributor', 'id_distributor');
+        return $this->belongsTo(Pelanggan::class, 'id_pelanggan', 'id_pelanggan');
     }
 
     public function hasilPrediksi(): HasOne

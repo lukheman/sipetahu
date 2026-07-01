@@ -79,8 +79,8 @@ class DataPenjualanManagement extends Component
     {
         return [
             'tanggal' => ['required', 'date'],
-            'jenis_pembeli' => ['required', 'in:distributor,langsung'],
-            'id_distributor' => ['nullable', 'exists:distributor,id_distributor', 'required_if:jenis_pembeli,distributor'],
+            'jenis_pembeli' => ['required', 'in:pelanggan,langsung'],
+            'id_pelanggan' => ['nullable', 'exists:pelanggan,id_pelanggan', 'required_if:jenis_pembeli,pelanggan'],
             'total_produksi' => ['required', 'integer', 'min:0'],
             'total_penjualan' => ['required', 'integer', 'min:0'],
             'details.*.produksi' => ['required', 'integer', 'min:0'],
@@ -127,7 +127,7 @@ class DataPenjualanManagement extends Component
         $this->editingId = $id;
         $this->tanggal = $record->tanggal;
         $this->jenis_pembeli = $record->jenis_pembeli;
-        $this->id_distributor = $record->id_distributor;
+        $this->id_pelanggan = $record->id_pelanggan;
         $this->total_produksi = $record->total_produksi;
         $this->total_penjualan = $record->total_penjualan;
 
@@ -146,7 +146,7 @@ class DataPenjualanManagement extends Component
         $validated = $this->validate();
 
         if ($validated['jenis_pembeli'] === 'langsung') {
-            $validated['id_distributor'] = null;
+            $validated['id_pelanggan'] = null;
         }
 
         if ($this->editingId) {
@@ -154,7 +154,7 @@ class DataPenjualanManagement extends Component
             $record->update([
                 'tanggal' => $validated['tanggal'],
                 'jenis_pembeli' => $validated['jenis_pembeli'],
-                'id_distributor' => $validated['id_distributor'],
+                'id_pelanggan' => $validated['id_pelanggan'],
                 'total_produksi' => $validated['total_produksi'],
                 'total_penjualan' => $validated['total_penjualan'],
             ]);
@@ -174,7 +174,7 @@ class DataPenjualanManagement extends Component
             $record = DataPenjualan::create([
                 'tanggal' => $validated['tanggal'],
                 'jenis_pembeli' => $validated['jenis_pembeli'],
-                'id_distributor' => $validated['id_distributor'],
+                'id_pelanggan' => $validated['id_pelanggan'],
                 'total_produksi' => $validated['total_produksi'],
                 'total_penjualan' => $validated['total_penjualan'],
             ]);
@@ -348,7 +348,7 @@ class DataPenjualanManagement extends Component
     public function render()
     {
         $records = DataPenjualan::query()
-            ->with(['distributor', 'detailPenjualans.produk'])
+            ->with(['pelanggan', 'detailPenjualans.produk'])
             ->when(
                 $this->search,
                 fn($q) =>
@@ -362,11 +362,11 @@ class DataPenjualanManagement extends Component
             ->orderBy('tanggal', $this->sort_tanggal === 'asc' ? 'asc' : 'desc')
             ->paginate(10);
 
-        $distributors = \App\Models\Distributor::orderBy('nama_distributor')->get();
+        $pelanggans = \App\Models\Pelanggan::orderBy('nama_pelanggan')->get();
 
         return view('livewire.admin.data-penjualan-management', [
             'records' => $records,
-            'distributors' => $distributors,
+            'pelanggans' => $pelanggans,
         ]);
     }
 }
