@@ -17,15 +17,32 @@ class PelangganManagement extends Component
     public $pelangganId;
     public $nama_pelanggan = '';
     public $no_hp = '';
+    public $email = '';
+    public $password = '';
     public $alamat = '';
 
     public $isEditMode = false;
+    public $deleteId = null;
+    public $showDeleteModal = false;
 
-    protected $rules = [
-        'nama_pelanggan' => 'required|string|max:255',
-        'no_hp' => 'nullable|string|max:20',
-        'alamat' => 'nullable|string',
-    ];
+    protected function rules()
+    {
+        $rules = [
+            'nama_pelanggan' => 'required|string|max:255',
+            'no_hp' => 'nullable|string|max:20',
+            'alamat' => 'nullable|string',
+        ];
+
+        if ($this->isEditMode) {
+            $rules['email'] = 'required|email|unique:pelanggan,email,' . $this->pelangganId . ',id_pelanggan';
+            $rules['password'] = 'nullable|string|min:8';
+        } else {
+            $rules['email'] = 'required|email|unique:pelanggan,email';
+            $rules['password'] = 'required|string|min:8';
+        }
+
+        return $rules;
+    }
 
     public function updatingSearch()
     {
@@ -37,6 +54,8 @@ class PelangganManagement extends Component
         $this->pelangganId = null;
         $this->nama_pelanggan = '';
         $this->no_hp = '';
+        $this->email = '';
+        $this->password = '';
         $this->alamat = '';
         $this->isEditMode = false;
         $this->resetErrorBag();
@@ -50,6 +69,8 @@ class PelangganManagement extends Component
         Pelanggan::create([
             'nama_pelanggan' => $this->nama_pelanggan,
             'no_hp' => $this->no_hp,
+            'email' => $this->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($this->password),
             'alamat' => $this->alamat,
         ]);
 
@@ -66,6 +87,7 @@ class PelangganManagement extends Component
         $this->pelangganId = $pelanggan->id_pelanggan;
         $this->nama_pelanggan = $pelanggan->nama_pelanggan;
         $this->no_hp = $pelanggan->no_hp;
+        $this->email = $pelanggan->email;
         $this->alamat = $pelanggan->alamat;
         
         $this->isEditMode = true;
@@ -77,11 +99,19 @@ class PelangganManagement extends Component
 
         if ($this->pelangganId) {
             $pelanggan = Pelanggan::findOrFail($this->pelangganId);
-            $pelanggan->update([
+            
+            $data = [
                 'nama_pelanggan' => $this->nama_pelanggan,
                 'no_hp' => $this->no_hp,
+                'email' => $this->email,
                 'alamat' => $this->alamat,
-            ]);
+            ];
+
+            if (!empty($this->password)) {
+                $data['password'] = \Illuminate\Support\Facades\Hash::make($this->password);
+            }
+
+            $pelanggan->update($data);
 
             session()->flash('success', 'Pelanggan berhasil diperbarui!');
             $this->resetInputFields();
@@ -89,10 +119,25 @@ class PelangganManagement extends Component
         }
     }
 
-    public function delete($id)
+    public function confirmDelete($id)
     {
-        Pelanggan::findOrFail($id)->delete();
-        session()->flash('success', 'Pelanggan berhasil dihapus!');
+        $this->deleteId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function cancelDelete()
+    {
+        $this->deleteId = null;
+        $this->showDeleteModal = false;
+    }
+
+    public function delete()
+    {
+        if ($this->deleteId) {
+            Pelanggan::findOrFail($this->deleteId)->delete();
+            session()->flash('success', 'Pelanggan berhasil dihapus!');
+            $this->cancelDelete();
+        }
     }
 
     public function render()

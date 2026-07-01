@@ -28,10 +28,6 @@
                 </p>
 
                 <div class="hero-actions">
-                    <a href="#prediksi" class="btn-hero-cta">
-                        Mulai Prediksi
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </a>
                     <a href="#metode" class="btn-hero-ghost">Pelajari Metode WMA</a>
                 </div>
 

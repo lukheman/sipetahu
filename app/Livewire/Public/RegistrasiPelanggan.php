@@ -12,31 +12,41 @@ class RegistrasiPelanggan extends Component
     public $nama_pelanggan = '';
     public $no_hp = '';
     public $alamat = '';
+    public $email = '';
+    public $password = '';
+    public $password_confirmation = '';
 
-    public $successMessage = false;
 
-    protected $rules = [
-        'nama_pelanggan' => 'required|string|max:255',
-        'no_hp' => 'nullable|string|max:20',
-        'alamat' => 'nullable|string',
-    ];
+    protected function rules()
+    {
+        return [
+            'nama_pelanggan' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:20',
+            'alamat' => 'nullable|string',
+            'email' => 'required|email|unique:pelanggan,email',
+            'password' => 'required|min:8|confirmed',
+        ];
+    }
 
     public function submit()
     {
         $this->validate();
 
-        Pelanggan::create([
+        $pelanggan = Pelanggan::create([
             'nama_pelanggan' => $this->nama_pelanggan,
             'no_hp' => $this->no_hp,
             'alamat' => $this->alamat,
+            'email' => $this->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($this->password),
         ]);
 
-        $this->successMessage = true;
-        $this->reset(['nama_pelanggan', 'no_hp', 'alamat']);
+        session()->flash('success', 'Registrasi berhasil! Silakan login menggunakan email dan password Anda.');
+        return redirect()->route('login');
     }
 
     public function render()
     {
-        return view('livewire.public.registrasi-pelanggan')->layout('layouts.guest');
+        return view('livewire.public.registrasi-pelanggan')
+            ->layout('layouts.guest', ['type' => 'auth']);
     }
 }

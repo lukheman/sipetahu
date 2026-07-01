@@ -48,34 +48,34 @@
                 </thead>
                 <tbody>
                     @forelse ($users as $user)
-                        <tr wire:key="user-{{ $user->id_user }}">
+                        <tr wire:key="user-{{ $user->role_name }}-{{ $user->id }}">
                             <td>
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="user-avatar">{{ $user->initials() }}</div>
+                                    <div class="user-avatar">{{ $user->initials }}</div>
                                     <div>
                                         <div class="fw-semibold" style="color: var(--text-primary);">{{ $user->name }}</div>
-                                        <small class="text-muted">ID: {{ $user->id_user }}</small>
+                                        <small class="text-muted">ID: {{ $user->id }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td style="color: var(--text-secondary);">{{ $user->email }}</td>
                             <td>
-                                @if($user->role === 'admin')
+                                @if($user->role_name === 'admin')
                                     <x-badge variant="danger" icon="fas fa-user-shield">Administrator</x-badge>
-                                @elseif($user->role === 'pemilik')
+                                @elseif($user->role_name === 'pemilik')
                                     <x-badge variant="primary" icon="fas fa-user-tie">Pemilik</x-badge>
                                 @else
-                                    <x-badge variant="secondary">{{ ucfirst($user->role->value) }}</x-badge>
+                                    <x-badge variant="secondary">{{ ucfirst($user->role_name) }}</x-badge>
                                 @endif
                             </td>
                             <td>
                                 <div class="d-flex gap-1">
                                     <x-button
-                                        wire:click="openEditModal({{ $user->id_user }})" title="Edit user">
+                                        wire:click="openEditModal({{ $user->id }}, '{{ $user->role_name }}')" title="Edit user">
                                         <i class="fas fa-edit"></i>
                                     </x-button>
                                     <x-button variant="danger"
-                                        wire:click="confirmDelete({{ $user->id_user }})" title="Delete user">
+                                        wire:click="confirmDelete({{ $user->id }}, '{{ $user->role_name }}')" title="Hapus pengguna">
                                         <i class="fas fa-trash-alt"></i>
                                     </x-button>
                                 </div>
@@ -166,9 +166,9 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="password_confirmation" class="form-label">Confirm Password</label>
+                        <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
                         <input type="password" class="form-control" id="password_confirmation"
-                            wire:model="password_confirmation" placeholder="Confirm password">
+                            wire:model="password_confirmation" placeholder="Konfirmasi password">
                     </div>
 
                     <div class="d-flex justify-content-end gap-2">
@@ -185,11 +185,11 @@
     @endif
 
     {{-- Delete Confirmation Modal --}}
-    <x-confirm-modal :show="$showDeleteModal" title="Confirm Delete"
-        message="Are you sure you want to delete this user? This action cannot be undone." on-confirm="deleteUser"
+    <x-confirm-modal :show="$showDeleteModal" title="Konfirmasi Hapus"
+        message="Apakah Anda yakin ingin menghapus pengguna ini? Aksi ini tidak dapat dibatalkan." on-confirm="deleteUser"
         on-cancel="cancelDelete" variant="danger" icon="fas fa-exclamation-triangle">
         <x-slot:confirmButton>
-            <i class="fas fa-trash-alt me-2"></i>Delete User
+            Hapus Pengguna
         </x-slot:confirmButton>
     </x-confirm-modal>
 </div>

@@ -9,6 +9,15 @@
             <p>Masuk ke sistem prediksi penjualan </p>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success d-flex align-items-center mb-4" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: var(--green-brand); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 0.9rem;">
+                <i class="fas fa-check-circle me-2" style="font-size: 1.1rem;"></i>
+                <div>
+                    {{ session('success') }}
+                </div>
+            </div>
+        @endif
+
         {{-- Login Form --}}
         <form action="{{ route('login') }}" method="POST">
             @csrf
@@ -50,14 +59,7 @@
                 @enderror
             </div>
 
-            {{-- Remember & Forgot --}}
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                    <label class="form-check-label" for="remember">Ingat saya</label>
-                </div>
-                <a href="#" class="forgot-password">Lupa Password?</a>
-            </div>
+
 
             {{-- Submit --}}
             <button type="submit" class="btn-login">
@@ -69,8 +71,11 @@
         {{-- Divider --}}
         <div class="divider"><span>atau</span></div>
 
-        {{-- Back to home --}}
+        {{-- Back to home & Register --}}
         <div class="signup-link mt-2">
+            Belum punya akun pelanggan? <a href="{{ route('registrasi-pelanggan') }}">Daftar sekarang</a>
+        </div>
+        <div class="signup-link mt-3">
             <a href="/" style="color: var(--text-mid); font-weight:400;">
                 <i class="fas fa-arrow-left" style="font-size:0.75rem;"></i>
                 Kembali ke Beranda

@@ -12,6 +12,9 @@ class LogoutController extends Controller
      */
     public function __invoke(Request $request)
     {
+        \Illuminate\Support\Facades\Auth::guard('web')->logout();
+        \Illuminate\Support\Facades\Auth::guard('pemilik')->logout();
+        \Illuminate\Support\Facades\Auth::guard('pelanggan')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

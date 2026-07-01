@@ -1,6 +1,6 @@
 @props([
     'title' => 'Modern Admin Dashboard',
-    'brandName' => '',
+    'brandName' => 'Sipetahu',
     'brandIcon' => 'fas fa-layer-group'
 ])
 
@@ -562,43 +562,62 @@ use App\Enums\Role;
 <body>
     <!-- Sidebar -->
     <x-sidebar :brand-name="$brandName" :brand-icon="$brandIcon">
-        <x-sidebar-section title="Utama">
-            <x-sidebar-link href="{{ route('dashboard') }}" icon="fas fa-home" :active="request()->routeIs('dashboard')">Dashboard</x-sidebar-link>
+        @if (!auth('pelanggan')->check())
+            <x-sidebar-section title="Utama">
+                <x-sidebar-link href="{{ route('dashboard') }}" icon="fas fa-home" :active="request()->routeIs('dashboard')">Dashboard</x-sidebar-link>
 
-            @if (auth()->user()->role == Role::ADMIN)
-                <x-sidebar-link href="{{ route('admin.users') }}" icon="fas fa-users" :active="request()->routeIs('admin.users')">Pengguna</x-sidebar-link>
-            @endif
-        </x-sidebar-section>
-
-        @if (auth()->user()->role == Role::ADMIN)
-            <x-sidebar-section title="Manajemen">
-                <x-sidebar-link href="{{ route('admin.pelanggan') }}" icon="fas fa-truck" :active="request()->routeIs('admin.pelanggan')">Pelanggan</x-sidebar-link>
-                <x-sidebar-link href="{{ route('admin.produk') }}" icon="fas fa-box" :active="request()->routeIs('admin.produk')">Produk</x-sidebar-link>
-                <x-sidebar-link href="{{ route('admin.data-penjualan') }}" icon="fas fa-chart-line" :active="request()->routeIs('admin.data-penjualan')">Data Penjualan</x-sidebar-link>
+                @if (auth()->check() && auth()->user()->role == Role::ADMIN)
+                    <x-sidebar-link href="{{ route('admin.users') }}" icon="fas fa-users" :active="request()->routeIs('admin.users')">Pengguna</x-sidebar-link>
+                @endif
             </x-sidebar-section>
         @endif
 
-        @if (auth()->user()->role === \App\Enums\Role::PEMILIK)
+        @if (auth()->check() && auth()->user()->role == Role::ADMIN)
+            <x-sidebar-section title="Manajemen">
+                <x-sidebar-link href="{{ route('admin.pelanggan') }}" icon="fas fa-truck" :active="request()->routeIs('admin.pelanggan')">Pelanggan</x-sidebar-link>
+                <x-sidebar-link href="{{ route('admin.produk') }}" icon="fas fa-box" :active="request()->routeIs('admin.produk')">Produk</x-sidebar-link>
+                <x-sidebar-link href="{{ route('admin.data-penjualan') }}" icon="fas fa-chart-line" :active="request()->routeIs('admin.data-penjualan')">Produksi & Penjualan</x-sidebar-link>
+            </x-sidebar-section>
+        @endif
+
+        @if (auth()->check() && auth()->user()->role === \App\Enums\Role::PEMILIK)
             <x-sidebar-section title="Laporan">
                 <x-sidebar-link href="{{ route('admin.laporan-penjualan') }}" icon="fas fa-file-invoice-dollar" :active="request()->routeIs('admin.laporan-penjualan')">Laporan Penjualan</x-sidebar-link>
                 <x-sidebar-link href="{{ route('admin.laporan-wma') }}" icon="fas fa-chart-bar" :active="request()->routeIs('admin.laporan-wma')">Laporan WMA</x-sidebar-link>
             </x-sidebar-section>
         @endif
 
-        <x-sidebar-section title="Prediksi">
-            <x-sidebar-link href="{{ route('admin.prediksi-tahu') }}" icon="fas fa-chart-area" :active="request()->routeIs('admin.prediksi-tahu')">Prediksi WMA</x-sidebar-link>
-        </x-sidebar-section>
+        @if (auth('pelanggan')->check())
+            <x-sidebar-section title="Pelanggan">
+                <x-sidebar-link href="{{ route('pelanggan.riwayat-pembelian') }}" icon="fas fa-shopping-bag" :active="request()->routeIs('pelanggan.riwayat-pembelian')">Riwayat Pembelian</x-sidebar-link>
+            </x-sidebar-section>
+        @endif
 
-        <x-sidebar-section title="Pengguna">
-            <x-sidebar-link href="{{ route('admin.profile') }}" icon="fas fa-user-circle" :active="request()->routeIs('admin.profile')">Akun</x-sidebar-link>
-        </x-sidebar-section>
+        @if (!auth('pelanggan')->check())
+            <x-sidebar-section title="Prediksi">
+                <x-sidebar-link href="{{ route('admin.prediksi-tahu') }}" icon="fas fa-chart-area" :active="request()->routeIs('admin.prediksi-tahu')">Prediksi WMA</x-sidebar-link>
+            </x-sidebar-section>
+
+            <x-sidebar-section title="Pengguna">
+                <x-sidebar-link href="{{ route('admin.profile') }}" icon="fas fa-user-circle" :active="request()->routeIs('admin.profile')">Akun</x-sidebar-link>
+            </x-sidebar-section>
+        @endif
     </x-sidebar>
 
     <!-- Main Content -->
+    @php
+        $currentUser = auth('web')->user() ?? auth('pemilik')->user() ?? auth('pelanggan')->user();
+        $userName = $currentUser->name ?? $currentUser->nama_pelanggan ?? 'Tamu';
+        if ($currentUser instanceof \App\Models\Pelanggan) {
+            $userRole = 'Pelanggan';
+        } else {
+            $userRole = $currentUser?->role?->label() ?? 'Tamu';
+        }
+    @endphp
     <div class="main-content">
         <x-topbar
-            :user-name="Auth::user()?->name ?? 'Guest'"
-            user-role="Administrator"
+            :user-name="$userName"
+            :user-role="$userRole"
             :notification-count="0"
             :show-logout="true"
         />

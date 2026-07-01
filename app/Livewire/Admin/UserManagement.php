@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\User;
 use App\Enums\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -43,12 +42,15 @@ class UserManagement extends Component
         ];
 
         if ($this->editingUserId) {
-            $rules['email'][] = 'unique:users,email,' . $this->editingUserId;
+            $table = $this->role === 'admin' ? 'admin' : 'pemilik';
+            $pk = $this->role === 'admin' ? 'id_admin' : 'id_pemilik';
+            $rules['email'][] = 'unique:'.$table.',email,' . $this->editingUserId . ',' . $pk;
             if ($this->password) {
                 $rules['password'] = ['confirmed', Password::defaults()];
             }
         } else {
-            $rules['email'][] = 'unique:users,email';
+            $table = $this->role === 'admin' ? 'admin' : 'pemilik';
+            $rules['email'][] = 'unique:'.$table.',email';
             $rules['password'] = ['required', 'confirmed', Password::defaults()];
         }
 
@@ -67,13 +69,18 @@ class UserManagement extends Component
         $this->showModal = true;
     }
 
-    public function openEditModal(int $userId): void
+    public function openEditModal(int $userId, string $role): void
     {
-        $user = User::findOrFail($userId);
+        if ($role === 'admin') {
+            $user = \App\Models\Admin::findOrFail($userId);
+        } else {
+            $user = \App\Models\Pemilik::findOrFail($userId);
+        }
+
         $this->editingUserId = $userId;
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->role = $user->role->value;
+        $this->role = $role;
         $this->password = '';
         $this->password_confirmation = '';
         $this->showModal = true;
@@ -84,10 +91,14 @@ class UserManagement extends Component
         $validated = $this->validate();
 
         if ($this->editingUserId) {
-            $user = User::findOrFail($this->editingUserId);
+            if ($this->role === 'admin') {
+                $user = \App\Models\Admin::findOrFail($this->editingUserId);
+            } else {
+                $user = \App\Models\Pemilik::findOrFail($this->editingUserId);
+            }
+
             $user->name = $validated['name'];
             $user->email = $validated['email'];
-            $user->role = $validated['role'];
 
             if (!empty($this->password)) {
                 $user->password = Hash::make($this->password);
@@ -96,12 +107,19 @@ class UserManagement extends Component
             $user->save();
             session()->flash('success', 'User updated successfully.');
         } else {
-            User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'role' => $validated['role'],
-            ]);
+            if ($validated['role'] === 'admin') {
+                \App\Models\Admin::create([
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'password' => Hash::make($validated['password']),
+                ]);
+            } else {
+                \App\Models\Pemilik::create([
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'password' => Hash::make($validated['password']),
+                ]);
+            }
             session()->flash('success', 'User created successfully.');
         }
 
@@ -115,27 +133,34 @@ class UserManagement extends Component
         $this->resetValidation();
     }
 
-    public function confirmDelete(int $userId): void
+    public function confirmDelete(int $userId, string $role): void
     {
         $this->deletingUserId = $userId;
+        $this->role = $role; // reuse role for deletion
         $this->showDeleteModal = true;
     }
 
     public function deleteUser(): void
     {
         if ($this->deletingUserId) {
-            User::destroy($this->deletingUserId);
+            if ($this->role === 'admin') {
+                \App\Models\Admin::destroy($this->deletingUserId);
+            } else {
+                \App\Models\Pemilik::destroy($this->deletingUserId);
+            }
             session()->flash('success', 'User deleted successfully.');
         }
 
         $this->showDeleteModal = false;
         $this->deletingUserId = null;
+        $this->role = '';
     }
 
     public function cancelDelete(): void
     {
         $this->showDeleteModal = false;
         $this->deletingUserId = null;
+        $this->role = '';
     }
 
     protected function resetForm(): void
@@ -150,16 +175,54 @@ class UserManagement extends Component
 
     public function render()
     {
-        $users = User::query()
+        $admins = \App\Models\Admin::query()
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('email', 'like', '%' . $this->search . '%');
             })
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get()->map(function($a) {
+                return (object)[
+                    'id' => $a->id_admin,
+                    'name' => $a->name,
+                    'email' => $a->email,
+                    'role_name' => 'admin',
+                    'created_at' => $a->created_at,
+                    'initials' => method_exists($a, 'initials') ? $a->initials() : substr($a->name, 0, 2),
+                ];
+            });
+
+        $pemiliks = \App\Models\Pemilik::query()
+            ->when($this->search, function ($query) {
+                $query->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('email', 'like', '%' . $this->search . '%');
+            })
+            ->get()->map(function($p) {
+                return (object)[
+                    'id' => $p->id_pemilik,
+                    'name' => $p->name,
+                    'email' => $p->email,
+                    'role_name' => 'pemilik',
+                    'created_at' => $p->created_at,
+                    'initials' => method_exists($p, 'initials') ? $p->initials() : substr($p->name, 0, 2),
+                ];
+            });
+
+        // Collect and paginate manually
+        $allUsers = collect($admins)->merge($pemiliks)->sortByDesc('created_at')->values();
+
+        // Simple manual pagination
+        $page = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
+        $perPage = 10;
+        $paginatedItems = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allUsers->forPage($page, $perPage),
+            $allUsers->count(),
+            $perPage,
+            $page,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+        );
 
         return view('livewire.admin.user-management', [
-            'users' => $users,
+            'users' => $paginatedItems,
         ]);
     }
 }

@@ -1,6 +1,6 @@
 <div>
     {{-- Page Header --}}
-    <x-page-header title="Data Penjualan" subtitle="Kelola data penjualan">
+    <x-page-header title="Produksi & Penjualan" subtitle="Kelola data produksi dan penjualan">
         <x-slot:actions>
             <x-button variant="danger" icon="fas fa-trash-alt" wire:click="confirmDeleteAll" title="Hapus Semua Data" class="me-auto">
                 Hapus Semua
@@ -96,7 +96,7 @@
                                     {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
                                 </td>
                                 <td class="align-middle">
-                                    @if($record->jenis_pembeli === 'pelanggan')
+                                    @if($record->id_pelanggan)
                                         <span class="badge bg-primary">Pelanggan: {{ $record->pelanggan?->nama_pelanggan }}</span>
                                     @else
                                         <span class="badge bg-secondary">Langsung</span>
@@ -126,7 +126,7 @@
                                             {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
                                         </td>
                                         <td rowspan="{{ $detailsCount }}" class="align-middle border-end">
-                                            @if($record->jenis_pembeli === 'pelanggan')
+                                            @if($record->id_pelanggan)
                                                 <span class="badge bg-primary">Pelanggan: {{ $record->pelanggan?->nama_pelanggan }}</span>
                                             @else
                                                 <span class="badge bg-secondary">Langsung</span>
@@ -182,27 +182,30 @@
                         <table class="table table-modern">
                             <thead>
                                 <tr>
-                                    <th>Bulan</th>
-                                    @foreach($this->products as $p)
-                                        <th>{{ $p->nama_produk }}</th>
-                                    @endforeach
+                                    <th class="text-start">Bulan</th>
+                                    <th>Nama Produk</th>
+                                    <th>Total Produksi</th>
                                     <th>Total Penjualan</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($this->monthlyRecords as $rec)
-                                    <tr>
-                                        <td class="fw-semibold">{{ $bulanOptions[$rec['bulan']] ?? $rec['bulan'] }} {{ $rec['tahun'] }}</td>
-                                        @foreach($this->products as $p)
-                                            <td>
-                                                {{ isset($rec['produk'][$p->nama_produk]) ? number_format($rec['produk'][$p->nama_produk], 0, ',', '.') : 0 }}
-                                            </td>
-                                        @endforeach
-                                        <td class="fw-bold" style="color: var(--primary-color);">{{ number_format($rec['total_penjualan'], 0, ',', '.') }}</td>
-                                    </tr>
+                                    @php $detailsCount = max(1, count($rec['produk'])); @endphp
+                                    @foreach($rec['produk'] as $index => $prod)
+                                        <tr>
+                                            @if($index === 0)
+                                                <td class="text-start fw-semibold align-middle border-end" rowspan="{{ $detailsCount }}">
+                                                    {{ $bulanOptions[$rec['bulan']] ?? $rec['bulan'] }} {{ $rec['tahun'] }}
+                                                </td>
+                                            @endif
+                                            <td class="align-middle">{{ $prod['nama_produk'] }}</td>
+                                            <td class="align-middle">{{ number_format($prod['total_produksi'], 0, ',', '.') }}</td>
+                                            <td class="fw-bold align-middle" style="color: var(--primary-color);">{{ number_format($prod['total_penjualan'], 0, ',', '.') }}</td>
+                                        </tr>
+                                    @endforeach
                                 @empty
                                     <tr>
-                                        <td colspan="{{ count($this->products) + 2 }}" class="text-center py-4 text-muted">Belum ada data bulanan.</td>
+                                        <td colspan="4" class="text-center py-4 text-muted">Belum ada data bulanan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -229,31 +232,13 @@
                 <form wire:submit="save">
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">Jenis Pembeli <span style="color: var(--danger-color);">*</span></label>
-                            <div class="d-flex gap-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="jenis_pembeli" id="pembeli_langsung" value="langsung" wire:model.live="jenis_pembeli">
-                                    <label class="form-check-label" for="pembeli_langsung">Datang Langsung (Pembeli Biasa)</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="jenis_pembeli" id="pembeli_pelanggan" value="pelanggan" wire:model.live="jenis_pembeli">
-                                    <label class="form-check-label" for="pembeli_pelanggan">Pelanggan</label>
-                                </div>
-                            </div>
-                            @error('jenis_pembeli') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                            <x-select 
+                                label="Pilih Pelanggan (Opsional, kosongkan jika pembeli langsung)" 
+                                wire:model="id_pelanggan" 
+                                :options="$pelanggans->pluck('nama_pelanggan', 'id_pelanggan')->toArray()" 
+                                placeholder="-- Pembeli Langsung --"
+                            />
                         </div>
-
-                        @if($jenis_pembeli === 'pelanggan')
-                            <div class="col-md-12 mb-3">
-                                <x-select 
-                                    label="Pilih Pelanggan" 
-                                    wire:model="id_pelanggan" 
-                                    :options="$pelanggans->pluck('nama_pelanggan', 'id_pelanggan')->toArray()" 
-                                    placeholder="-- Pilih Pelanggan --"
-                                    required
-                                />
-                            </div>
-                        @endif
 
                         <div class="col-md-12 mb-3">
                             <x-input type="date" label="Tanggal" wire:model="tanggal" required />

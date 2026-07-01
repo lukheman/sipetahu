@@ -12,7 +12,6 @@ class DataPenjualan extends Model
 
     protected $fillable = [
         'tanggal',
-        'jenis_pembeli',
         'id_pelanggan',
         'total_produksi',
         'total_penjualan',

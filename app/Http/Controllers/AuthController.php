@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -25,9 +24,19 @@ class AuthController extends Controller
 
         $remember = $request->has('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::guard('web')->attempt($credentials, $remember)) {
             $request->session()->regenerate();
             return redirect()->route('dashboard');
+        }
+
+        if (Auth::guard('pemilik')->attempt($credentials, $remember)) {
+            $request->session()->regenerate();
+            return redirect()->route('dashboard');
+        }
+
+        if (Auth::guard('pelanggan')->attempt($credentials, $remember)) {
+            $request->session()->regenerate();
+            return redirect()->route('pelanggan.riwayat-pembelian');
         }
 
         throw ValidationException::withMessages([

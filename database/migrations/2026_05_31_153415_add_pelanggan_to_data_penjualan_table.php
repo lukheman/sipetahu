@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('data_penjualan', function (Blueprint $table) {
-            $table->enum('jenis_pembeli', ['pelanggan', 'langsung'])->default('langsung')->after('tanggal');
-            $table->unsignedBigInteger('id_pelanggan')->nullable()->after('jenis_pembeli');
+            $table->unsignedBigInteger('id_pelanggan')->nullable()->after('tanggal');
             
             $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggan')->onDelete('set null');
         });
@@ -26,7 +25,7 @@ return new class extends Migration
     {
         Schema::table('data_penjualan', function (Blueprint $table) {
             $table->dropForeign(['id_pelanggan']);
-            $table->dropColumn(['jenis_pembeli', 'id_pelanggan']);
+            $table->dropColumn(['id_pelanggan']);
         });
     }
 };

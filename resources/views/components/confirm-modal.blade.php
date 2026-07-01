@@ -1,9 +1,9 @@
 @props([
     'show' => false,
-    'title' => 'Confirm Action',
-    'message' => 'Are you sure you want to proceed? This action cannot be undone.',
-    'confirmText' => 'Confirm',
-    'cancelText' => 'Cancel',
+    'title' => 'Konfirmasi Aksi',
+    'message' => 'Apakah Anda yakin ingin melanjutkan? Aksi ini tidak dapat dibatalkan.',
+    'confirmText' => 'Konfirmasi',
+    'cancelText' => 'Batal',
     'variant' => 'danger',
     'icon' => 'fas fa-exclamation-triangle',
     'onConfirm' => null,

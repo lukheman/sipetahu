@@ -68,7 +68,7 @@
                 <input type="date" wire:model="end_date" class="form-control" style="background-color: var(--bg-light); border-radius: 8px;">
             </div>
             <div class="col-md-4">
-                <x-button wire:click="kalkulasiWMA" class="btn btn-primary px-4 py-2 w-100 shadow-sm" style="border-radius: 8px;" wire:loading.attr="disabled">
+                <x-button wire:click="kalkulasiWMA" variant="primary" class="w-100" wire:loading.attr="disabled">
                     <span wire:loading.remove wire:target="kalkulasiWMA">
                         <i class="fas fa-calculator me-2"></i>Hitung Prediksi (WMA)
                     </span>

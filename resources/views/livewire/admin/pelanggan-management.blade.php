@@ -30,6 +30,7 @@
                     <tr>
                         <th width="50">No</th>
                         <th class="text-start">Nama Pelanggan</th>
+                        <th>Email</th>
                         <th>No HP</th>
                         <th class="text-start">Alamat</th>
                         <th width="150">Aksi</th>
@@ -40,6 +41,7 @@
                         <tr>
                             <td>{{ $loop->iteration + $pelanggans->firstItem() - 1 }}</td>
                             <td class="text-start fw-semibold">{{ $pelanggan->nama_pelanggan }}</td>
+                            <td>{{ $pelanggan->email }}</td>
                             <td>{{ $pelanggan->no_hp ?: '-' }}</td>
                             <td class="text-start">{{ $pelanggan->alamat ?: '-' }}</td>
                             <td>
@@ -52,8 +54,7 @@
                                         <i class="fas fa-edit"></i>
                                     </x-button>
                                     <x-button variant="danger"
-                                            wire:click="delete({{ $pelanggan->id_pelanggan }})"
-                                            wire:confirm="Yakin ingin menghapus pelanggan ini?"
+                                            wire:click="confirmDelete({{ $pelanggan->id_pelanggan }})"
                                             title="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </x-button>
@@ -62,7 +63,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-5">
+                            <td colspan="6" class="text-center text-muted py-5">
                                 <i class="fas fa-folder-open mb-3 fs-1 text-light"></i>
                                 <p class="mb-0">Tidak ada data pelanggan.</p>
                             </td>
@@ -102,7 +103,22 @@
                             <input type="text" class="form-control form-control-lg bg-light @error('no_hp') is-invalid @enderror" wire:model="no_hp" placeholder="Contoh: 08123456789">
                             @error('no_hp') <span class="invalid-feedback">{{ $message }}</span> @enderror
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" class="form-control form-control-lg bg-light @error('email') is-invalid @enderror" wire:model="email" placeholder="contoh@email.com">
+                            @error('email') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                        </div>
 
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Password
+                                @if($isEditMode)
+                                    <span class="text-muted fw-normal" style="font-size: 0.85em;">(Kosongkan jika tidak ingin diubah)</span>
+                                @endif
+                            </label>
+                            <input type="password" class="form-control form-control-lg bg-light @error('password') is-invalid @enderror" wire:model="password" placeholder="{{ $isEditMode ? 'Masukkan password baru' : 'Minimal 8 karakter' }}">
+                            @error('password') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                        </div>
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Alamat</label>
                             <textarea class="form-control form-control-lg bg-light @error('alamat') is-invalid @enderror" wire:model="alamat" placeholder="Alamat lengkap pelanggan" rows="3"></textarea>
@@ -122,6 +138,16 @@
             </div>
         </div>
     </div>
+    <x-confirm-modal
+        :show="$showDeleteModal"
+        title="Konfirmasi Hapus"
+        message="Apakah Anda yakin ingin menghapus data pelanggan ini? Data yang telah dihapus tidak dapat dikembalikan."
+        confirm-text="Hapus Pelanggan"
+        cancel-text="Batal"
+        variant="danger"
+        on-confirm="delete"
+        on-cancel="cancelDelete"
+    />
 </div>
 
 @script

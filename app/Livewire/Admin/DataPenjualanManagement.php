@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\DataPenjualanImport;
 use App\Exports\DataPenjualanExport;
 
-#[Title('Data Penjualan')]
+#[Title('Manajemen Produksi & Penjualan')]
 class DataPenjualanManagement extends Component
 {
     use WithPagination, WithFileUploads;
@@ -32,7 +32,7 @@ class DataPenjualanManagement extends Component
 
     // Form fields
     public string $tanggal = '';
-    public string $jenis_pembeli = 'langsung';
+
     public ?int $id_distributor = null;
     public array $details = [];
 
@@ -79,8 +79,7 @@ class DataPenjualanManagement extends Component
     {
         return [
             'tanggal' => ['required', 'date'],
-            'jenis_pembeli' => ['required', 'in:pelanggan,langsung'],
-            'id_pelanggan' => ['nullable', 'exists:pelanggan,id_pelanggan', 'required_if:jenis_pembeli,pelanggan'],
+            'id_pelanggan' => ['nullable', 'exists:pelanggan,id_pelanggan'],
             'total_produksi' => ['required', 'integer', 'min:0'],
             'total_penjualan' => ['required', 'integer', 'min:0'],
             'details.*.produksi' => ['required', 'integer', 'min:0'],
@@ -126,7 +125,7 @@ class DataPenjualanManagement extends Component
         $record = DataPenjualan::with('detailPenjualans')->findOrFail($id);
         $this->editingId = $id;
         $this->tanggal = $record->tanggal;
-        $this->jenis_pembeli = $record->jenis_pembeli;
+
         $this->id_pelanggan = $record->id_pelanggan;
         $this->total_produksi = $record->total_produksi;
         $this->total_penjualan = $record->total_penjualan;
@@ -145,15 +144,10 @@ class DataPenjualanManagement extends Component
     {
         $validated = $this->validate();
 
-        if ($validated['jenis_pembeli'] === 'langsung') {
-            $validated['id_pelanggan'] = null;
-        }
-
         if ($this->editingId) {
             $record = DataPenjualan::findOrFail($this->editingId);
             $record->update([
                 'tanggal' => $validated['tanggal'],
-                'jenis_pembeli' => $validated['jenis_pembeli'],
                 'id_pelanggan' => $validated['id_pelanggan'],
                 'total_produksi' => $validated['total_produksi'],
                 'total_penjualan' => $validated['total_penjualan'],
@@ -173,7 +167,6 @@ class DataPenjualanManagement extends Component
         } else {
             $record = DataPenjualan::create([
                 'tanggal' => $validated['tanggal'],
-                'jenis_pembeli' => $validated['jenis_pembeli'],
                 'id_pelanggan' => $validated['id_pelanggan'],
                 'total_produksi' => $validated['total_produksi'],
                 'total_penjualan' => $validated['total_penjualan'],
@@ -251,7 +244,7 @@ class DataPenjualanManagement extends Component
     protected function resetForm(): void
     {
         $this->tanggal = now()->format('Y-m-d');
-        $this->jenis_pembeli = 'langsung';
+
         $this->id_distributor = null;
         $this->total_produksi = 0;
         $this->total_penjualan = 0;
@@ -320,7 +313,7 @@ class DataPenjualanManagement extends Component
     {
         $details = \App\Models\DetailPenjualan::join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
             ->join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
-            ->selectRaw('YEAR(data_penjualan.tanggal) as tahun, MONTH(data_penjualan.tanggal) as bulan, produk.nama_produk, SUM(detail_penjualan.penjualan) as total_penjualan_produk')
+            ->selectRaw('YEAR(data_penjualan.tanggal) as tahun, MONTH(data_penjualan.tanggal) as bulan, produk.nama_produk, SUM(detail_penjualan.produksi) as total_produksi, SUM(detail_penjualan.penjualan) as total_penjualan')
             ->groupBy('tahun', 'bulan', 'produk.nama_produk')
             ->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
@@ -334,12 +327,14 @@ class DataPenjualanManagement extends Component
                 $grouped[$key] = [
                     'tahun' => $d->tahun,
                     'bulan' => $d->bulan,
-                    'total_penjualan' => 0,
                     'produk' => []
                 ];
             }
-            $grouped[$key]['total_penjualan'] += $d->total_penjualan_produk;
-            $grouped[$key]['produk'][$d->nama_produk] = $d->total_penjualan_produk;
+            $grouped[$key]['produk'][] = [
+                'nama_produk' => $d->nama_produk,
+                'total_produksi' => $d->total_produksi,
+                'total_penjualan' => $d->total_penjualan,
+            ];
         }
 
         return collect($grouped)->values();

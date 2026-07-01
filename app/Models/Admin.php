@@ -10,31 +10,30 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
-class User extends Authenticatable
+class Admin extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    protected $table = 'users';
-    protected $primaryKey = 'id_user';
+    protected $table = 'admin';
+    protected $primaryKey = 'id_admin';
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'avatar',
-        'role'
+        'avatar'
     ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -51,8 +50,12 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => Role::class
         ];
+    }
+
+    public function getRoleAttribute()
+    {
+        return \App\Enums\Role::ADMIN;
     }
 
     /**

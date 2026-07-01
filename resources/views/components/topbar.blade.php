@@ -46,7 +46,7 @@
         @if($showLogout)
             <form method="POST" action="{{ route('logout') }}" class="d-inline">
                 @csrf
-                <button type="submit" class="btn btn-link" title="Logout" style="color: var(--text-secondary);">
+                <button type="submit" class="btn btn-link" title="Keluar" style="color: var(--text-secondary);">
                     <i class="fas fa-sign-out-alt" style="font-size: 1.25rem;"></i>
                 </button>
             </form>

@@ -1,60 +1,75 @@
-<div>
-    <div style="min-height: 100vh; padding-top: calc(var(--nav-height) + 40px); padding-bottom: 60px;">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-md-8 col-lg-6">
-                    <div style="background: var(--bg-white); border-radius: var(--radius-lg); border: 1.5px solid var(--border-color); padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
-                        <div class="text-center mb-5">
-                            <h2 style="font-family: var(--font-display); font-weight: 700; color: var(--text-primary);">Daftar Menjadi Pelanggan</h2>
-                            <p style="color: var(--text-secondary); margin-top: 10px;">Silakan lengkapi data diri Anda di bawah ini untuk mendaftar sebagai pelanggan kami.</p>
+<div class="login-container" style="max-width: 600px; margin: 0 auto;">
+    <div class="login-card">
+        <div class="text-center mb-5">
+            <h2 style="font-family: var(--font-display); font-weight: 800; color: var(--ink);">Daftar Menjadi Pelanggan</h2>
+            <p style="color: var(--text-mid); margin-top: 10px;">Silakan lengkapi data diri Anda di bawah ini untuk mendaftar sebagai pelanggan kami.</p>
+        </div>
+
+            <form wire:submit.prevent="submit">
+                <div class="form-floating position-relative mb-3">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="nama_pelanggan" wire:model="nama_pelanggan" class="form-control @error('nama_pelanggan') is-invalid @enderror" placeholder="Nama Lengkap" required>
+                    <label for="nama_pelanggan">Nama Lengkap</label>
+                    @error('nama_pelanggan') <div class="invalid-feedback" style="margin-left: 2.75rem;">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="form-floating position-relative mb-3">
+                    <i class="fas fa-phone input-icon"></i>
+                    <input type="text" id="no_hp" wire:model="no_hp" class="form-control @error('no_hp') is-invalid @enderror" placeholder="Nomor WhatsApp / HP" required>
+                    <label for="no_hp">Nomor WhatsApp / HP</label>
+                    @error('no_hp') <div class="invalid-feedback" style="margin-left: 2.75rem;">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="form-floating position-relative mb-3">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="email" wire:model="email" class="form-control @error('email') is-invalid @enderror" placeholder="Alamat Email" required>
+                    <label for="email">Alamat Email</label>
+                    @error('email') <div class="invalid-feedback" style="margin-left: 2.75rem;">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-floating position-relative">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="password" wire:model="password" class="form-control @error('password') is-invalid @enderror" placeholder="Password" required>
+                            <label for="password">Password</label>
+                            @error('password') <div class="invalid-feedback" style="margin-left: 2.75rem;">{{ $message }}</div> @enderror
                         </div>
-
-                        @if ($successMessage)
-                            <div class="alert alert-success d-flex align-items-center" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: var(--green-brand); border-radius: var(--radius-sm); padding: 15px;">
-                                <i class="fas fa-check-circle me-3" style="font-size: 1.5rem;"></i>
-                                <div>
-                                    Pendaftaran berhasil! Terima kasih telah mendaftar sebagai pelanggan kami.
-                                </div>
-                            </div>
-                        @else
-                            <form wire:submit.prevent="submit">
-                                <div class="mb-4">
-                                    <label for="nama_pelanggan" style="display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-primary);">Nama Lengkap <span class="text-danger">*</span></label>
-                                    <input type="text" id="nama_pelanggan" wire:model="nama_pelanggan" class="form-control" style="background: var(--bg-light); border: 1.5px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-sm); padding: 12px 16px; width: 100%; transition: all var(--duration) var(--ease);" placeholder="Masukkan nama lengkap Anda" required>
-                                    @error('nama_pelanggan') <span class="text-danger small mt-1" style="display: block;">{{ $message }}</span> @enderror
-                                </div>
-
-                                <div class="mb-4">
-                                    <label for="no_hp" style="display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-primary);">Nomor WhatsApp / HP <span class="text-danger">*</span></label>
-                                    <input type="text" id="no_hp" wire:model="no_hp" class="form-control" style="background: var(--bg-light); border: 1.5px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-sm); padding: 12px 16px; width: 100%; transition: all var(--duration) var(--ease);" placeholder="Contoh: 081234567890" required>
-                                    @error('no_hp') <span class="text-danger small mt-1" style="display: block;">{{ $message }}</span> @enderror
-                                </div>
-
-                                <div class="mb-5">
-                                    <label for="alamat" style="display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-primary);">Alamat Lengkap <span class="text-danger">*</span></label>
-                                    <textarea id="alamat" wire:model="alamat" class="form-control" style="background: var(--bg-light); border: 1.5px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-sm); padding: 12px 16px; width: 100%; min-height: 120px; transition: all var(--duration) var(--ease);" placeholder="Masukkan alamat lengkap Anda" required></textarea>
-                                    @error('alamat') <span class="text-danger small mt-1" style="display: block;">{{ $message }}</span> @enderror
-                                </div>
-
-                                <button type="submit" class="btn-nav-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 1rem; border: none; cursor: pointer; position: relative; overflow: hidden;" wire:loading.attr="disabled">
-                                    <span wire:loading.remove wire:target="submit">
-                                        <i class="fas fa-paper-plane me-2"></i> Kirim Pendaftaran
-                                    </span>
-                                    <span wire:loading wire:target="submit">
-                                        <i class="fas fa-spinner fa-spin me-2"></i> Memproses...
-                                    </span>
-                                </button>
-                            </form>
-                        @endif
-
-                        <div class="text-center mt-5">
-                            <a href="/" style="color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color var(--duration) var(--ease);">
-                                <i class="fas fa-arrow-left me-1"></i> Kembali ke Beranda
-                            </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-floating position-relative">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="password_confirmation" wire:model="password_confirmation" class="form-control" placeholder="Konfirmasi Password" required>
+                            <label for="password_confirmation">Konfirmasi Password</label>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="form-floating position-relative mb-4">
+                    <i class="fas fa-map-marker-alt input-icon" style="top: 1.5rem; transform: none;"></i>
+                    <textarea id="alamat" wire:model="alamat" class="form-control @error('alamat') is-invalid @enderror" style="height: 100px; padding-top: 1.5rem;" placeholder="Alamat Lengkap" required></textarea>
+                    <label for="alamat">Alamat Lengkap</label>
+                    @error('alamat') <div class="invalid-feedback" style="margin-left: 2.75rem;">{{ $message }}</div> @enderror
+                </div>
+
+                <button type="submit" class="btn-login" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="submit">
+                        <i class="fas fa-paper-plane me-2"></i> Daftar sebagai Pelanggan
+                    </span>
+                    <span wire:loading wire:target="submit">
+                        <i class="fas fa-spinner fa-spin me-2"></i> Memproses...
+                    </span>
+                </button>
+            </form>
+
+
+        <div class="signup-link mt-4">
+            Sudah punya akun? <a href="{{ route('login') }}" style="color: var(--green-brand); font-weight: 600; text-decoration: none;">Masuk di sini</a>
+        </div>
+        <div class="signup-link mt-3">
+            <a href="/" style="color: var(--text-mid); font-weight:400; text-decoration: none;">
+                <i class="fas fa-arrow-left" style="font-size:0.75rem;"></i> Kembali ke Beranda
+            </a>
         </div>
     </div>
 </div>

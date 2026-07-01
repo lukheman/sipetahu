@@ -22,7 +22,11 @@ Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegist
 Route::post('/register', [App\Http\Controllers\AuthController::class, 'register']);
 Route::get('/daftar-pelanggan', \App\Livewire\Public\RegistrasiPelanggan::class)->name('registrasi-pelanggan');
 
-Route::prefix('admin')->middleware('auth')->group(function () {
+Route::prefix('pelanggan')->middleware('auth:pelanggan')->group(function () {
+    Route::get('/riwayat-pembelian', \App\Livewire\Pelanggan\RiwayatPembelian::class)->name('pelanggan.riwayat-pembelian');
+});
+
+Route::prefix('admin')->middleware('auth:web,pemilik,pelanggan')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/data-penjualan', DataPenjualanManagement::class)->name('admin.data-penjualan');
     Route::get('/pelanggan', \App\Livewire\Admin\PelangganManagement::class)->name('admin.pelanggan');
