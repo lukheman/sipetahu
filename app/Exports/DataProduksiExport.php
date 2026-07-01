@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
+class DataProduksiExport implements FromCollection, WithHeadings, WithMapping
 {
     public string $search;
     public string $filter_produk;
@@ -43,10 +43,8 @@ class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             'Tanggal',
-            'Jenis Pembeli',
-            'Pelanggan',
             'Nama Produk',
-            'Penjualan'
+            'Produksi'
         ];
     }
 
@@ -56,10 +54,8 @@ class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
         
         return [
             $dataPenjualan ? $dataPenjualan->tanggal : '',
-            $dataPenjualan ? ucfirst($dataPenjualan->jenis_pembeli) : '',
-            ($dataPenjualan && $dataPenjualan->pelanggan) ? $dataPenjualan->pelanggan->nama_pelanggan : '-',
             $detail->produk ? $detail->produk->nama_produk : '',
-            $detail->penjualan,
+            $detail->produksi,
         ];
     }
 }

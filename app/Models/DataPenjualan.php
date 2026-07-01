@@ -13,7 +13,6 @@ class DataPenjualan extends Model
     protected $fillable = [
         'tanggal',
         'id_pelanggan',
-        'total_produksi',
         'total_penjualan',
     ];
 

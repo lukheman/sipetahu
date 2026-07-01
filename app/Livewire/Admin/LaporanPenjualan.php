@@ -36,20 +36,17 @@ class LaporanPenjualan extends Component
         $products = \App\Models\Produk::orderBy('id_produk')->get();
 
         $summary = [
-            'total_produksi' => $records->sum('total_produksi'),
             'total_penjualan' => $records->sum('total_penjualan'),
             'products' => []
         ];
 
         foreach ($products as $product) {
             $summary['products'][$product->id_produk] = [
-                'produksi' => 0,
                 'penjualan' => 0,
             ];
             foreach ($records as $record) {
                 $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk);
                 if ($detail) {
-                    $summary['products'][$product->id_produk]['produksi'] += $detail->produksi;
                     $summary['products'][$product->id_produk]['penjualan'] += $detail->penjualan;
                 }
             }
@@ -80,20 +77,17 @@ class LaporanPenjualan extends Component
         $products = \App\Models\Produk::orderBy('id_produk')->get();
 
         $summary = [
-            'total_produksi' => $records->sum('total_produksi'),
             'total_penjualan' => $records->sum('total_penjualan'),
             'products' => []
         ];
 
         foreach ($products as $product) {
             $summary['products'][$product->id_produk] = [
-                'produksi' => 0,
                 'penjualan' => 0,
             ];
             foreach ($records as $record) {
                 $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk);
                 if ($detail) {
-                    $summary['products'][$product->id_produk]['produksi'] += $detail->produksi;
                     $summary['products'][$product->id_produk]['penjualan'] += $detail->penjualan;
                 }
             }

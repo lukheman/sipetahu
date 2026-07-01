@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\DataPenjualan;
+use App\Models\DataProduksi;
 use App\Models\Produk;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -10,11 +10,11 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\DataPenjualanImport;
-use App\Exports\DataPenjualanExport;
+use App\Imports\DataProduksiImport;
+use App\Exports\DataProduksiExport;
 
-#[Title('Manajemen Penjualan')]
-class DataPenjualanManagement extends Component
+#[Title('Manajemen Produksi')]
+class DataProduksiManagement extends Component
 {
     use WithPagination, WithFileUploads;
 
@@ -33,8 +33,7 @@ class DataPenjualanManagement extends Component
     // Form fields
     public string $tanggal = '';
 
-    public ?int $id_pelanggan = null;
-    public array $penjualan_details = [];
+    public array $produksi_details = [];
 
     // State
     public ?int $editingId = null;
@@ -65,29 +64,28 @@ class DataPenjualanManagement extends Component
 
     protected function initializeDetails(): void
     {
-        $this->penjualan_details = [
+        $this->produksi_details = [
             ['id_produk' => '', 'jumlah' => 0]
         ];
     }
 
-    public function addPenjualanDetail(): void
+    public function addProduksiDetail(): void
     {
-        $this->penjualan_details[] = ['id_produk' => '', 'jumlah' => 0];
+        $this->produksi_details[] = ['id_produk' => '', 'jumlah' => 0];
     }
 
-    public function removePenjualanDetail($index): void
+    public function removeProduksiDetail($index): void
     {
-        unset($this->penjualan_details[$index]);
-        $this->penjualan_details = array_values($this->penjualan_details);
+        unset($this->produksi_details[$index]);
+        $this->produksi_details = array_values($this->produksi_details);
     }
 
     protected function rules(): array
     {
         return [
             'tanggal' => ['required', 'date'],
-            'id_pelanggan' => ['nullable', 'exists:pelanggan,id_pelanggan'],
-            'penjualan_details.*.id_produk' => ['required', 'exists:produk,id_produk'],
-            'penjualan_details.*.jumlah' => ['required', 'integer', 'min:0'],
+            'produksi_details.*.id_produk' => ['required', 'exists:produk,id_produk'],
+            'produksi_details.*.jumlah' => ['required', 'integer', 'min:0'],
         ];
     }
 
@@ -126,82 +124,79 @@ class DataPenjualanManagement extends Component
     public function openEditModal(int $id): void
     {
         $this->resetForm();
-        $record = DataPenjualan::with('detailPenjualans')->findOrFail($id);
+        $record = DataProduksi::with('detailProduksis')->findOrFail($id);
         $this->editingId = $id;
         $this->tanggal = $record->tanggal;
-        $this->id_pelanggan = $record->id_pelanggan;
 
-        $this->penjualan_details = [];
+        $this->produksi_details = [];
         
-        foreach ($record->detailPenjualans as $detail) {
-            $this->penjualan_details[] = [
+        foreach ($record->detailProduksis as $detail) {
+            $this->produksi_details[] = [
                 'id_produk' => $detail->id_produk,
-                'jumlah' => $detail->penjualan,
+                'jumlah' => $detail->produksi,
             ];
         }
 
-        if (empty($this->penjualan_details)) $this->penjualan_details = [['id_produk' => '', 'jumlah' => 0]];
+        if (empty($this->produksi_details)) $this->produksi_details = [['id_produk' => '', 'jumlah' => 0]];
 
         $this->showModal = true;
     }
 
     public function save(): void
     {
-        $this->penjualan_details = array_values(array_filter($this->penjualan_details, function ($detail) {
+        $this->produksi_details = array_values(array_filter($this->produksi_details, function ($detail) {
             return !empty($detail['id_produk']);
         }));
 
-        if (empty($this->penjualan_details)) {
+        if (empty($this->produksi_details)) {
             $this->addError('tanggal', 'Silakan pilih produk sebelum menyimpan data.');
-            if (empty($this->penjualan_details)) $this->penjualan_details = [['id_produk' => '', 'jumlah' => 0]];
+            if (empty($this->produksi_details)) $this->produksi_details = [['id_produk' => '', 'jumlah' => 0]];
             return;
         }
 
         $validated = $this->validate();
 
-        $total_penjualan = collect($validated['penjualan_details'] ?? [])->sum('jumlah');
+        $total_produksi = collect($validated['produksi_details'] ?? [])->sum('jumlah');
 
         $merged_details = [];
-        if (!empty($validated['penjualan_details'])) {
-            foreach ($validated['penjualan_details'] as $p) {
+        if (!empty($validated['produksi_details'])) {
+            foreach ($validated['produksi_details'] as $p) {
                 $pid = $p['id_produk'];
-                if (!isset($merged_details[$pid])) $merged_details[$pid] = ['penjualan' => 0];
-                $merged_details[$pid]['penjualan'] += $p['jumlah'];
+                if (!isset($merged_details[$pid])) $merged_details[$pid] = ['produksi' => 0];
+                $merged_details[$pid]['produksi'] += $p['jumlah'];
             }
         }
 
         if ($this->editingId) {
-            $record = DataPenjualan::findOrFail($this->editingId);
+            $record = DataProduksi::findOrFail($this->editingId);
             $record->update([
                 'tanggal' => $validated['tanggal'],
-                'id_pelanggan' => $validated['id_pelanggan'],
-                'total_penjualan' => $total_penjualan,
+                'total_produksi' => $total_produksi,
             ]);
 
-            $record->detailPenjualans()->delete();
+            $record->detailProduksis()->delete();
             foreach ($merged_details as $id_produk => $data) {
-                $record->detailPenjualans()->create([
+                $record->detailProduksis()->create([
                     'id_produk' => $id_produk,
-                    'penjualan' => $data['penjualan'],
+                    'produksi' => $data['produksi'],
                 ]);
             }
 
-            session()->flash('success', 'Data penjualan berhasil diperbarui.');
+            session()->flash('success', 'Data produksi berhasil diperbarui.');
         } else {
-            $record = DataPenjualan::create([
+            $record = DataProduksi::create([
                 'tanggal' => $validated['tanggal'],
-                'id_pelanggan' => $validated['id_pelanggan'],
-                'total_penjualan' => $total_penjualan,
+                'total_produksi' => $total_produksi,
             ]);
 
             foreach ($merged_details as $id_produk => $data) {
-                $record->detailPenjualans()->create([
+                $record->detailProduksis()->create([
                     'id_produk' => $id_produk,
-                    'penjualan' => $data['penjualan'],
+                    'produksi' => $data['produksi'],
                 ]);
             }
 
-            session()->flash('success', 'Data penjualan berhasil ditambahkan.');
+            session()->flash('success', 'Data produksi berhasil ditambahkan.');
         }
 
         $this->closeModal();
@@ -223,8 +218,8 @@ class DataPenjualanManagement extends Component
     public function delete(): void
     {
         if ($this->deletingId) {
-            DataPenjualan::destroy($this->deletingId);
-            session()->flash('success', 'Data penjualan berhasil dihapus.');
+            DataProduksi::destroy($this->deletingId);
+            session()->flash('success', 'Data produksi berhasil dihapus.');
         }
 
         $this->showDeleteModal = false;
@@ -247,12 +242,11 @@ class DataPenjualanManagement extends Component
     public function deleteAll(): void
     {
         \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        \App\Models\HasilPrediksi::truncate();
-        \App\Models\DetailPenjualan::truncate();
-        DataPenjualan::truncate();
+        \App\Models\DetailProduksi::truncate();
+        DataProduksi::truncate();
         \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        session()->flash('success', 'Semua data penjualan berhasil dihapus beserta seluruh riwayat prediksinya.');
+        session()->flash('success', 'Semua data produksi berhasil dihapus.');
         $this->showDeleteAllModal = false;
         $this->resetPage();
     }
@@ -265,8 +259,6 @@ class DataPenjualanManagement extends Component
     protected function resetForm(): void
     {
         $this->tanggal = now()->format('Y-m-d');
-
-        $this->id_pelanggan = null;
         $this->initializeDetails();
         $this->editingId = null;
     }
@@ -287,7 +279,7 @@ class DataPenjualanManagement extends Component
 
     public function downloadTemplate()
     {
-        return Excel::download(new \App\Exports\TemplatePenjualanExport, 'template_import_penjualan.xlsx');
+        return Excel::download(new \App\Exports\TemplateProduksiExport, 'template_import_produksi.xlsx');
     }
 
     public function importData()
@@ -302,11 +294,11 @@ class DataPenjualanManagement extends Component
         ]);
 
         try {
-            $import = new DataPenjualanImport;
+            $import = new DataProduksiImport;
             Excel::import($import, $this->file_import->path());
 
             if ($import->importedCount > 0) {
-                session()->flash('success', "Berhasil mengimpor {$import->importedCount} data penjualan.");
+                session()->flash('success', "Berhasil mengimpor {$import->importedCount} data produksi.");
             } else {
                 session()->flash('error', 'Tidak ada data yang berhasil diimpor. Pastikan format file sesuai template.');
             }
@@ -318,7 +310,7 @@ class DataPenjualanManagement extends Component
 
     public function exportData()
     {
-        return Excel::download(new DataPenjualanExport($this->search, $this->filter_produk, $this->sort_tanggal), 'data_penjualan.xlsx');
+        return Excel::download(new DataProduksiExport($this->search, $this->filter_produk, $this->sort_tanggal), 'data_produksi.xlsx');
     }
 
     #[\Livewire\Attributes\Computed]
@@ -330,9 +322,9 @@ class DataPenjualanManagement extends Component
     #[\Livewire\Attributes\Computed]
     public function monthlyRecords()
     {
-        $details = \App\Models\DetailPenjualan::join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
-            ->join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
-            ->selectRaw('YEAR(data_penjualan.tanggal) as tahun, MONTH(data_penjualan.tanggal) as bulan, produk.nama_produk, SUM(detail_penjualan.penjualan) as total_penjualan')
+        $details = \App\Models\DetailProduksi::join('data_produksi', 'detail_produksi.id_data_produksi', '=', 'data_produksi.id_data_produksi')
+            ->join('produk', 'detail_produksi.id_produk', '=', 'produk.id_produk')
+            ->selectRaw('YEAR(data_produksi.tanggal) as tahun, MONTH(data_produksi.tanggal) as bulan, produk.nama_produk, SUM(detail_produksi.produksi) as total_produksi')
             ->groupBy('tahun', 'bulan', 'produk.nama_produk')
             ->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
@@ -351,7 +343,7 @@ class DataPenjualanManagement extends Component
             }
             $grouped[$key]['produk'][] = [
                 'nama_produk' => $d->nama_produk,
-                'total_penjualan' => $d->total_penjualan,
+                'total_produksi' => $d->total_produksi,
             ];
         }
 
@@ -360,9 +352,9 @@ class DataPenjualanManagement extends Component
 
     public function render()
     {
-        $records = DataPenjualan::query()
-            ->where('total_penjualan', '>', 0)
-            ->with(['pelanggan', 'detailPenjualans.produk'])
+        $records = DataProduksi::query()
+            ->where('total_produksi', '>', 0)
+            ->with(['detailProduksis.produk'])
             ->when(
                 $this->search,
                 fn($q) =>
@@ -371,16 +363,13 @@ class DataPenjualanManagement extends Component
             ->when(
                 $this->filter_produk,
                 fn($q) => 
-                $q->whereHas('detailPenjualans', fn($dq) => $dq->where('id_produk', $this->filter_produk))
+                $q->whereHas('detailProduksis', fn($dq) => $dq->where('id_produk', $this->filter_produk))
             )
             ->orderBy('tanggal', $this->sort_tanggal === 'asc' ? 'asc' : 'desc')
             ->paginate(10);
 
-        $pelanggans = \App\Models\Pelanggan::orderBy('nama_pelanggan')->get();
-
-        return view('livewire.admin.data-penjualan-management', [
+        return view('livewire.admin.data-produksi-management', [
             'records' => $records,
-            'pelanggans' => $pelanggans,
         ]);
     }
 }

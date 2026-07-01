@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class DataPenjualanImport implements ToCollection
+class DataProduksiImport implements ToCollection
 {
     public int $importedCount = 0;
 
@@ -33,48 +33,32 @@ class DataPenjualanImport implements ToCollection
                 continue;
             }
 
-            $jenis_pembeli = $this->getVal($rowArray, $columnMap, 'jenis_pembeli');
-            $jenis_pembeli = $jenis_pembeli ? strtolower(trim($jenis_pembeli)) : 'langsung';
-
-            $pelanggan_name = $this->getVal($rowArray, $columnMap, 'pelanggan');
-            $id_pelanggan = null;
-            if ($jenis_pembeli === 'pelanggan' && $pelanggan_name) {
-                $dist = \App\Models\Pelanggan::where('nama_pelanggan', 'like', "%{$pelanggan_name}%")->first();
-                $id_pelanggan = $dist ? $dist->id_pelanggan : null;
-            }
-
             $record = DataPenjualan::firstOrCreate(
                 ['tanggal' => $tanggal],
                 [
-                    'jenis_pembeli' => $jenis_pembeli,
-                    'id_pelanggan' => $id_pelanggan,
+                    'jenis_pembeli' => 'langsung',
+                    'id_pelanggan' => null,
+                    'total_produksi' => 0,
                     'total_penjualan' => 0,
                 ]
             );
-
-            // Update if empty
-            if ($record->jenis_pembeli === 'langsung' && $jenis_pembeli === 'pelanggan') {
-                $record->update([
-                    'jenis_pembeli' => $jenis_pembeli,
-                    'id_pelanggan' => $id_pelanggan,
-                ]);
-            }
 
             $nama_produk = $this->getVal($rowArray, $columnMap, 'nama_produk');
             if ($nama_produk) {
                 $product = \App\Models\Produk::where('nama_produk', 'like', "%{$nama_produk}%")->first();
                 if ($product) {
-                    $penjualan = $this->toInt($this->getVal($rowArray, $columnMap, 'penjualan'));
+                    $produksi = $this->toInt($this->getVal($rowArray, $columnMap, 'produksi'));
 
                     $record->detailPenjualans()->updateOrCreate(
                         ['id_produk' => $product->id_produk],
                         [
-                            'penjualan' => $penjualan,
+                            'produksi' => $produksi,
+                            'penjualan' => 0,
                         ]
                     );
 
                     $record->update([
-                        'total_penjualan' => $record->detailPenjualans()->sum('penjualan'),
+                        'total_produksi' => $record->detailPenjualans()->sum('produksi'),
                     ]);
                 }
             }

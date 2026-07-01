@@ -576,7 +576,8 @@ use App\Enums\Role;
             <x-sidebar-section title="Manajemen">
                 <x-sidebar-link href="{{ route('admin.pelanggan') }}" icon="fas fa-truck" :active="request()->routeIs('admin.pelanggan')">Pelanggan</x-sidebar-link>
                 <x-sidebar-link href="{{ route('admin.produk') }}" icon="fas fa-box" :active="request()->routeIs('admin.produk')">Produk</x-sidebar-link>
-                <x-sidebar-link href="{{ route('admin.data-penjualan') }}" icon="fas fa-chart-line" :active="request()->routeIs('admin.data-penjualan')">Produksi & Penjualan</x-sidebar-link>
+                <x-sidebar-link href="{{ route('admin.data-produksi') }}" icon="fas fa-industry" :active="request()->routeIs('admin.data-produksi')">Data Produksi</x-sidebar-link>
+                <x-sidebar-link href="{{ route('admin.data-penjualan') }}" icon="fas fa-chart-line" :active="request()->routeIs('admin.data-penjualan')">Data Penjualan</x-sidebar-link>
             </x-sidebar-section>
         @endif
 

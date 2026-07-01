@@ -6,7 +6,7 @@ use App\Models\Produk;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class TemplatePenjualanExport implements FromArray, WithHeadings
+class TemplateProduksiExport implements FromArray, WithHeadings
 {
     private $products;
 
@@ -19,10 +19,8 @@ class TemplatePenjualanExport implements FromArray, WithHeadings
     {
         return [
             'Tanggal',
-            'Jenis Pembeli',
-            'Pelanggan',
             'Nama Produk',
-            'Penjualan'
+            'Produksi'
         ];
     }
 
@@ -33,10 +31,8 @@ class TemplatePenjualanExport implements FromArray, WithHeadings
         foreach ($this->products as $product) {
             $rows[] = [
                 '2025-01-01',
-                'Langsung',
-                '',
                 $product->nama_produk,
-                450
+                500
             ];
         }
 

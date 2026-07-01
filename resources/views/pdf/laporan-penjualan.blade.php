@@ -81,17 +81,7 @@
     </div>
 
     <div class="summary-section">
-        <div class="summary-box">
-            <div class="summary-title">Total Produksi</div>
-            <div class="summary-value">{{ number_format($summary['total_produksi'], 0, ',', '.') }}</div>
-            <div class="summary-detail">
-                @foreach($products as $product)
-                    {{ $product->nama_produk }}: {{ number_format($summary['products'][$product->id_produk]['produksi'] ?? 0, 0, ',', '.') }}<br>
-                @endforeach
-            </div>
-        </div>
-        
-        <div class="summary-box">
+        <div class="summary-box" style="width: 100%;">
             <div class="summary-title">Total Penjualan</div>
             <div class="summary-value">{{ number_format($summary['total_penjualan'], 0, ',', '.') }}</div>
             <div class="summary-detail">
@@ -106,15 +96,9 @@
         <thead>
             <tr>
                 <th rowspan="2">Tanggal</th>
-                <th colspan="{{ $products->count() + 1 }}">Produksi Tahu</th>
                 <th colspan="{{ $products->count() + 1 }}">Penjualan Tahu</th>
             </tr>
             <tr>
-                @foreach($products as $product)
-                    <th>{{ $product->nama_produk }}</th>
-                @endforeach
-                <th>Total</th>
-
                 @foreach($products as $product)
                     <th>{{ $product->nama_produk }}</th>
                 @endforeach
@@ -128,19 +112,13 @@
                 
                 @foreach($products as $product)
                     @php $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk); @endphp
-                    <td>{{ number_format($detail?->produksi ?? 0, 0, ',', '.') }}</td>
-                @endforeach
-                <td class="total-column">{{ number_format($record->total_produksi, 0, ',', '.') }}</td>
-                
-                @foreach($products as $product)
-                    @php $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk); @endphp
                     <td>{{ number_format($detail?->penjualan ?? 0, 0, ',', '.') }}</td>
                 @endforeach
                 <td class="total-column">{{ number_format($record->total_penjualan, 0, ',', '.') }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="{{ 1 + ($products->count() * 2) + 2 }}" style="text-align: center; padding: 20px;">
+                <td colspan="{{ 1 + ($products->count()) + 1 }}" style="text-align: center; padding: 20px;">
                     Tidak ada data penjualan pada rentang tanggal ini.
                 </td>
             </tr>

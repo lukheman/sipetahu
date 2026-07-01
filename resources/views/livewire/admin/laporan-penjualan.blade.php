@@ -36,21 +36,8 @@
 
     <!-- Summary Cards -->
     <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="modern-card text-center position-relative overflow-hidden" style="border-top: 4px solid var(--primary-color);">
-                <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                    <i class="fas fa-boxes fa-3x" style="color: var(--primary-color);"></i>
-                </div>
-                <h6 class="text-muted mb-2 fw-bold text-uppercase" style="letter-spacing: 0.5px;">Total Produksi</h6>
-                <h2 class="mb-2" style="color: var(--primary-color); font-weight: 800;">{{ number_format($summary['total_produksi'], 0, ',', '.') }}</h2>
-                <div class="d-flex justify-content-center flex-wrap gap-3 text-muted" style="font-size: 0.85rem;">
-                    @foreach($products as $product)
-                        <span><i class="fas fa-circle ms-1" style="color: var(--primary-light); font-size: 0.5rem; vertical-align: middle;"></i> {{ $product->nama_produk }}: <strong>{{ number_format($summary['products'][$product->id_produk]['produksi'] ?? 0, 0, ',', '.') }}</strong></span>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
+
+        <div class="col-md-12">
             <div class="modern-card text-center position-relative overflow-hidden" style="border-top: 4px solid var(--bs-success);">
                 <div class="position-absolute top-0 end-0 p-3 opacity-10">
                     <i class="fas fa-shopping-cart fa-3x text-success"></i>
@@ -74,15 +61,9 @@
                 <thead>
                     <tr>
                         <th rowspan="2" class="align-middle border-end">Tanggal</th>
-                        <th colspan="{{ $products->count() + 1 }}" class="border-bottom border-end">Produksi Tahu</th>
                         <th colspan="{{ $products->count() + 1 }}" class="border-bottom">Penjualan Tahu</th>
                     </tr>
                     <tr>
-                        @foreach($products as $product)
-                            <th>{{ $product->nama_produk }}</th>
-                        @endforeach
-                        <th class="border-end">Total</th>
-
                         @foreach($products as $product)
                             <th>{{ $product->nama_produk }}</th>
                         @endforeach
@@ -94,13 +75,7 @@
                     <tr>
                         <td class="fw-semibold text-start border-end" style="color: var(--text-secondary);">{{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}</td>
                         
-                        {{-- Produksi --}}
-                        @foreach($products as $product)
-                            @php $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk); @endphp
-                            <td>{{ number_format($detail?->produksi ?? 0, 0, ',', '.') }}</td>
-                        @endforeach
-                        <td class="fw-bold border-end" style="color: var(--primary-color); background-color: rgba(67, 97, 238, 0.03);">{{ number_format($record->total_produksi, 0, ',', '.') }}</td>
-                        
+
                         {{-- Penjualan --}}
                         @foreach($products as $product)
                             @php $detail = $record->detailPenjualans->firstWhere('id_produk', $product->id_produk); @endphp
@@ -110,7 +85,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="{{ 1 + ($products->count() * 2) + 2 }}" class="text-center text-muted py-5">
+                        <td colspan="{{ 1 + ($products->count()) + 1 }}" class="text-center text-muted py-5">
                             <i class="fas fa-folder-open mb-3 fs-1 text-light"></i>
                             <p class="mb-0">Tidak ada data penjualan pada rentang tanggal ini.</p>
                         </td>
