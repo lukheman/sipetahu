@@ -41,9 +41,14 @@ class Dashboard extends Component
             12 => 'Des',
         ];
 
+        // Get the latest date to determine the end of our window
+        $lastData = DataPenjualan::orderBy('tanggal', 'desc')->first();
+        $endDate = $lastData ? \Carbon\Carbon::parse($lastData->tanggal) : now();
+        $startDate = $endDate->copy()->subMonths(3);
+
         // Group by tanggal for the chart
         $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
+            ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->groupBy('tanggal')
             ->orderBy('tanggal', 'asc')
             ->get();

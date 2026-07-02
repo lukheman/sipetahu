@@ -44,44 +44,47 @@ class PrediksiTahu extends Component
     {
         $nextPrediction = null;
 
-        $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
-            ->whereBetween('tanggal', [$this->start_date, $this->end_date])
-            ->groupBy('tanggal')
-            ->orderBy('tanggal', 'desc')
-            ->take(3)
-            ->get();
+        $startDateObj = \Carbon\Carbon::parse($this->start_date);
+        $endDateObj = \Carbon\Carbon::parse($this->end_date);
 
-        if ($dailyRecords->count() >= 3) {
-            $lastRecord = $dailyRecords->first();
-
-            $nextDate = \Carbon\Carbon::parse($lastRecord->tanggal)->addDay();
+        if ($startDateObj->lte($endDateObj)) {
+            $nextDate = $endDateObj->copy()->addDay();
             $nextHariStr = $nextDate->format('d M Y');
 
-            $wmaService = new WeightedMovingAverage();
-
-            $ascRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
+            $dbRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
                 ->whereBetween('tanggal', [$this->start_date, $this->end_date])
                 ->groupBy('tanggal')
-                ->orderBy('tanggal', 'asc')
-                ->get()
-                ->toArray();
+                ->pluck('total_penjualan', 'tanggal');
 
-            $wmaNext = $wmaService->calculateWMA($ascRecords, count($ascRecords));
-
-            $count = count($ascRecords);
-            $detailStr = null;
-            if ($count >= 3) {
-                $d3 = number_format($ascRecords[$count-3]['total_penjualan'], 2, ',', '.');
-                $d2 = number_format($ascRecords[$count-2]['total_penjualan'], 2, ',', '.');
-                $d1 = number_format($ascRecords[$count-1]['total_penjualan'], 2, ',', '.');
-                $detailStr = "(( {$d1} × 3 ) + ( {$d2} × 2 ) + ( {$d3} × 1 )) / 6";
+            $ascRecords = [];
+            $curr = $startDateObj->copy();
+            
+            while ($curr->lte($endDateObj)) {
+                $dStr = $curr->format('Y-m-d');
+                $ascRecords[] = [
+                    'tanggal' => $dStr,
+                    'total_penjualan' => $dbRecords->get($dStr) ?? 0,
+                ];
+                $curr->addDay();
             }
 
-            $nextPrediction = [
-                'tanggal' => $nextHariStr,
-                'wma' => $wmaNext,
-                'detail_wma' => $detailStr
-            ];
+            $wmaService = new WeightedMovingAverage();
+            $count = count($ascRecords);
+
+            if ($count >= 3) {
+                $wmaNext = $wmaService->calculateWMA($ascRecords, $count);
+
+                $d3 = number_format($ascRecords[$count-3]['total_penjualan'], 0, ',', '.');
+                $d2 = number_format($ascRecords[$count-2]['total_penjualan'], 0, ',', '.');
+                $d1 = number_format($ascRecords[$count-1]['total_penjualan'], 0, ',', '.');
+                $detailStr = "(( {$d1} × 3 ) + ( {$d2} × 2 ) + ( {$d3} × 1 )) / 6";
+
+                $nextPrediction = [
+                    'tanggal' => $nextHariStr,
+                    'wma' => $wmaNext,
+                    'detail_wma' => $detailStr
+                ];
+            }
         }
 
         $avgMAD = \App\Models\HasilPrediksi::query()->has('dataPenjualan')->avg('mad') ?? 0;

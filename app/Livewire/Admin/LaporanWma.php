@@ -22,7 +22,6 @@ class LaporanWma extends Component
     public function exportPdf()
     {
         $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('MONTH(tanggal)'), [12, 1, 2])
             ->groupBy('tanggal')
             ->orderBy('tanggal', 'asc')
             ->get();
