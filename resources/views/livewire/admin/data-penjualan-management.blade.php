@@ -123,36 +123,32 @@
                         @else
                             @foreach ($details as $index => $detail)
                                 <tr wire:key="record-{{ $record->id_data_penjualan }}-{{ $index }}">
-                                    @if ($index === 0)
-                                        <td rowspan="{{ $detailsCount }}" class="align-middle border-end">
-                                            {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
-                                        </td>
-                                        <td rowspan="{{ $detailsCount }}" class="align-middle border-end">
-                                            @if($record->id_pelanggan)
-                                                <span class="badge bg-primary">Pelanggan: {{ $record->pelanggan?->nama_pelanggan }}</span>
-                                            @else
-                                                <span class="badge bg-secondary">Langsung</span>
-                                            @endif
-                                        </td>
-                                    @endif
+                                    <td class="align-middle border-end">
+                                        {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
+                                    </td>
+                                    <td class="align-middle border-end">
+                                        @if($record->id_pelanggan)
+                                            <span class="badge bg-primary">Pelanggan: {{ $record->pelanggan?->nama_pelanggan }}</span>
+                                        @else
+                                            <span class="badge bg-secondary">Langsung</span>
+                                        @endif
+                                    </td>
 
                                     <td class="align-middle">{{ $detail->produk->nama_produk ?? '-' }}</td>
                                     <td class="align-middle border-end">{{ number_format($detail->penjualan, 0, ',', '.') }}</td>
 
-                                    @if ($index === 0)
-                                        <td rowspan="{{ $detailsCount }}" class="align-middle">
-                                            <div class="d-flex gap-1 justify-content-center">
-                                                <x-btn-edit
-                                                    wire:click="openEditModal({{ $record->id_data_penjualan }})"
-                                                    tooltip="Edit data"
-                                                />
-                                                <x-btn-delete
-                                                    wire:click="confirmDelete({{ $record->id_data_penjualan }})"
-                                                    tooltip="Hapus data"
-                                                />
-                                            </div>
-                                        </td>
-                                    @endif
+                                    <td class="align-middle">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <x-btn-edit
+                                                wire:click="openEditModal({{ $record->id_data_penjualan }})"
+                                                tooltip="Edit data"
+                                            />
+                                            <x-btn-delete
+                                                wire:click="confirmDelete({{ $record->id_data_penjualan }})"
+                                                tooltip="Hapus data"
+                                            />
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         @endif
