@@ -16,16 +16,8 @@ use App\Http\Controllers\Admin\LogoutController;
 // Guest Routes
 Route::view('/', 'landing')->name('home');
 
-// Auth Routes
 Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
-Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [App\Http\Controllers\AuthController::class, 'register']);
-Route::get('/daftar-pelanggan', \App\Livewire\Public\RegistrasiPelanggan::class)->name('registrasi-pelanggan');
-
-Route::prefix('pelanggan')->middleware('auth:pelanggan')->group(function () {
-    Route::get('/riwayat-pembelian', \App\Livewire\Pelanggan\RiwayatPembelian::class)->name('pelanggan.riwayat-pembelian');
-});
 
 Route::prefix('admin')->middleware('auth:web,pemilik,pelanggan')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');

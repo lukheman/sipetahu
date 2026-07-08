@@ -68,13 +68,7 @@
 
         </form>
 
-        {{-- Divider --}}
-        <div class="divider"><span>atau</span></div>
-
-        {{-- Back to home & Register --}}
-        <div class="signup-link mt-2">
-            Belum punya akun pelanggan? <a href="{{ route('registrasi-pelanggan') }}">Daftar sekarang</a>
-        </div>
+        {{-- Back to home --}}
         <div class="signup-link mt-3">
             <a href="/" style="color: var(--text-mid); font-weight:400;">
                 <i class="fas fa-arrow-left" style="font-size:0.75rem;"></i>

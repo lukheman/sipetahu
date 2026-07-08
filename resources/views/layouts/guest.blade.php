@@ -803,10 +803,6 @@
                     <i class="fas fa-moon" id="theme-icon"></i>
                 </button>
                 <a href="{{ route('login') }}" class="btn-nav-outline">Masuk</a>
-                <a href="{{ route('registrasi-pelanggan') }}" class="btn-nav-primary">
-                    Pendaftaran
-                    <i class="fas fa-user-plus" style="font-size:0.75rem;"></i>
-                </a>
                 <button class="mobile-menu-btn" aria-label="Open menu">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -852,7 +848,6 @@
                                 <li><a href="/#tentang">Tentang</a></li>
                                 <li><a href="/#fitur">Fitur</a></li>
                                 <li><a href="/#metode">Metode</a></li>
-                                <li><a href="{{ route('registrasi-pelanggan') }}">Daftar Pelanggan</a></li>
                             </ul>
                         </div>
                         <div class="footer-column">

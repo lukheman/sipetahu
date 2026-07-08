@@ -34,38 +34,8 @@ class AuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        if (Auth::guard('pelanggan')->attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-            return redirect()->route('pelanggan.riwayat-pembelian');
-        }
-
         throw ValidationException::withMessages([
             'email' => __('auth.failed'),
         ]);
-    }
-
-    public function showRegisterForm()
-    {
-        return view('auth.register');
-    }
-
-    public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => Role::ADMIN,
-        ]);
-
-        Auth::login($user);
-
-        return redirect()->route('dashboard');
     }
 }
