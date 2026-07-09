@@ -85,15 +85,14 @@
                 <tbody>
                     @forelse ($records as $record)
                         @php
-                            $details = $record->detailPenjualans;
+                            $details = $record->detailProduksis;
                             if ($filter_produk) {
                                 $details = $details->where('id_produk', $filter_produk)->values();
                             }
-                            $detailsCount = max(1, $details->count());
                         @endphp
 
                         @if ($details->isEmpty())
-                            <tr wire:key="record-{{ $record->id_data_penjualan }}">
+                            <tr wire:key="record-{{ $record->id_data_produksi }}">
                                 <td class="align-middle">
                                     {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
                                 </td>
@@ -102,11 +101,11 @@
                                 <td class="align-middle">
                                     <div class="d-flex gap-1 justify-content-center">
                                         <x-button
-                                            wire:click="openEditModal({{ $record->id_data_penjualan }})" title="Edit data">
+                                            wire:click="openEditModal({{ $record->id_data_produksi }})" title="Edit data">
                                             <i class="fas fa-edit"></i>
                                         </x-button>
                                         <x-button variant="danger"
-                                            wire:click="confirmDelete({{ $record->id_data_penjualan }})" title="Hapus data">
+                                            wire:click="confirmDelete({{ $record->id_data_produksi }})" title="Hapus data">
                                             <i class="fas fa-trash-alt"></i>
                                         </x-button>
                                     </div>
@@ -114,30 +113,26 @@
                             </tr>
                         @else
                             @foreach ($details as $index => $detail)
-                                <tr wire:key="record-{{ $record->id_data_penjualan }}-{{ $index }}">
-                                    @if ($index === 0)
-                                        <td rowspan="{{ $detailsCount }}" class="align-middle border-end">
-                                            {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
-                                        </td>
-                                    @endif
+                                <tr wire:key="record-{{ $record->id_data_produksi }}-{{ $index }}">
+                                    <td class="align-middle border-end">
+                                        {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
+                                    </td>
 
                                     <td class="align-middle">{{ $detail->produk->nama_produk ?? '-' }}</td>
                                     <td class="align-middle border-end">{{ number_format($detail->produksi, 0, ',', '.') }}</td>
 
-                                    @if ($index === 0)
-                                        <td rowspan="{{ $detailsCount }}" class="align-middle">
-                                            <div class="d-flex gap-1 justify-content-center">
-                                                <x-btn-edit
-                                                    wire:click="openEditModal({{ $record->id_data_penjualan }})"
-                                                    tooltip="Edit data"
-                                                />
-                                                <x-btn-delete
-                                                    wire:click="confirmDelete({{ $record->id_data_penjualan }})"
-                                                    tooltip="Hapus data"
-                                                />
-                                            </div>
-                                        </td>
-                                    @endif
+                                    <td class="align-middle">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <x-btn-edit
+                                                wire:click="openEditModal({{ $record->id_data_produksi }})"
+                                                tooltip="Edit data"
+                                            />
+                                            <x-btn-delete
+                                                wire:click="confirmDelete({{ $record->id_data_produksi }})"
+                                                tooltip="Hapus data"
+                                            />
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         @endif
