@@ -14,7 +14,7 @@
                 trend-direction="up" variant="secondary" />
         </div>
         <div class="col-md-6 col-lg-3">
-            <x-stat-card icon="fas fa-balance-scale" label="Volume Terjual" value="{{ number_format($stats['total_volume'], 0, ',', '.') }} Kg" trend-value="Total Keseluruhan"
+            <x-stat-card icon="fas fa-balance-scale" label="Volume Terjual" value="{{ number_format($stats['total_volume'], 0, ',', '.') }} Potong" trend-value="Total Keseluruhan"
                 trend-direction="up" variant="success" />
         </div>
         <div class="col-md-6 col-lg-3">
@@ -67,7 +67,7 @@
                     tooltip: { enabled: false }
                 },
                 yaxis: {
-                    title: { text: 'Jumlah (Kg)', style: { fontWeight: 500 } }
+                    title: { text: 'Jumlah (Potong)', style: { fontWeight: 500 } }
                 },
                 markers: {
                     size: 5,
@@ -85,7 +85,7 @@
                     y: {
                         formatter: function (y) {
                             if (typeof y !== "undefined" && y !== null) {
-                                return y.toLocaleString('id-ID') + " kg";
+                                return y.toLocaleString('id-ID') + " potong";
                             }
                             return y;
                         }

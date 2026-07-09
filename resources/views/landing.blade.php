@@ -285,7 +285,7 @@
                             <!-- Tooltip at last WMA point -->
                             <rect x="630" y="20" width="100" height="36" rx="6" fill="#0d0d0d"/>
                             <text x="680" y="35" text-anchor="middle" font-size="9" fill="#94a3b8">Prediksi</text>
-                            <text x="680" y="49" text-anchor="middle" font-size="11" fill="#C8F135" font-weight="bold">9,850 Kg</text>
+                            <text x="680" y="49" text-anchor="middle" font-size="11" fill="#C8F135" font-weight="bold">9,850 Potong</text>
                         </svg>
                     </div>
 
