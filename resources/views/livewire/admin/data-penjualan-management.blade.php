@@ -80,6 +80,7 @@
                     <th>Pembeli</th>
                     <th>Nama Produk</th>
                     <th>Penjualan</th>
+                    <th>Total Harga</th>
                     <th style="width: 120px;">Aksi</th>
                 </tr>
             </x-slot:head>
@@ -105,6 +106,7 @@
                                         <span class="badge bg-secondary">Langsung</span>
                                     @endif
                                 </td>
+                                <td class="align-middle text-muted">-</td>
                                 <td class="align-middle text-muted">-</td>
                                 <td class="align-middle text-muted">-</td>
                                 <td class="align-middle">
@@ -136,6 +138,7 @@
 
                                     <td class="align-middle">{{ $detail->produk->nama_produk ?? '-' }}</td>
                                     <td class="align-middle border-end">{{ number_format($detail->penjualan, 0, ',', '.') }}</td>
+                                    <td class="align-middle border-end">Rp {{ number_format($detail->penjualan * ($detail->produk->harga ?? 0), 0, ',', '.') }}</td>
 
                                     <td class="align-middle">
                                         <div class="d-flex gap-1 justify-content-center">
@@ -154,7 +157,7 @@
                         @endif
                     @empty
                         <tr>
-                            <td colspan="5" class="p-0 border-0">
+                            <td colspan="6" class="p-0 border-0">
                                 <x-empty-state
                                     size="sm"
                                     icon="fas fa-box-open"
@@ -164,6 +167,17 @@
                             </td>
                         </tr>
                     @endforelse
+                </tbody>
+                @if($records->total() > 0)
+                <tfoot>
+                    <tr class="fw-bold" style="background-color: var(--bg-tertiary);">
+                        <td colspan="3" class="text-end align-middle">Total Keseluruhan (Sesuai Filter):</td>
+                        <td class="align-middle text-primary">{{ number_format($grandTotal, 0, ',', '.') }} Potong</td>
+                        <td class="align-middle text-primary">Rp {{ number_format($grandTotalHarga, 0, ',', '.') }}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+                @endif
         </x-table>
 
         {{-- Pagination --}}
@@ -182,6 +196,7 @@
                                     <th class="text-start">Bulan</th>
                                     <th>Nama Produk</th>
                                     <th>Total Penjualan</th>
+                                    <th>Total Harga</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -196,11 +211,12 @@
                                             @endif
                                             <td class="align-middle">{{ $prod['nama_produk'] }}</td>
                                             <td class="fw-bold align-middle" style="color: var(--primary-color);">{{ number_format($prod['total_penjualan'], 0, ',', '.') }}</td>
+                                            <td class="fw-bold align-middle" style="color: var(--primary-color);">Rp {{ number_format($prod['total_harga'] ?? 0, 0, ',', '.') }}</td>
                                         </tr>
                                     @endforeach
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center py-4 text-muted">Belum ada data bulanan.</td>
+                                        <td colspan="4" class="text-center py-4 text-muted">Belum ada data bulanan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

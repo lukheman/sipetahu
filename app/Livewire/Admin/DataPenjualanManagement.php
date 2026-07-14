@@ -332,7 +332,7 @@ class DataPenjualanManagement extends Component
     {
         $details = \App\Models\DetailPenjualan::join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
             ->join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
-            ->selectRaw('YEAR(data_penjualan.tanggal) as tahun, MONTH(data_penjualan.tanggal) as bulan, produk.nama_produk, SUM(detail_penjualan.penjualan) as total_penjualan')
+            ->selectRaw('YEAR(data_penjualan.tanggal) as tahun, MONTH(data_penjualan.tanggal) as bulan, produk.nama_produk, SUM(detail_penjualan.penjualan) as total_penjualan, SUM(detail_penjualan.penjualan * produk.harga) as total_harga')
             ->groupBy('tahun', 'bulan', 'produk.nama_produk')
             ->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
@@ -352,6 +352,7 @@ class DataPenjualanManagement extends Component
             $grouped[$key]['produk'][] = [
                 'nama_produk' => $d->nama_produk,
                 'total_penjualan' => $d->total_penjualan,
+                'total_harga' => $d->total_harga,
             ];
         }
 
@@ -360,14 +361,12 @@ class DataPenjualanManagement extends Component
 
     public function render()
     {
-        $records = DataPenjualan::query()
+        $baseQuery = DataPenjualan::query()
             ->where('total_penjualan', '>', 0)
+            ->when($this->search, fn($q) => $q->where('tanggal', 'like', '%' . $this->search . '%'));
+
+        $records = (clone $baseQuery)
             ->with(['pelanggan', 'detailPenjualans.produk'])
-            ->when(
-                $this->search,
-                fn($q) =>
-                $q->where('tanggal', 'like', '%' . $this->search . '%')
-            )
             ->when(
                 $this->filter_produk,
                 fn($q) => 
@@ -376,11 +375,38 @@ class DataPenjualanManagement extends Component
             ->orderBy('tanggal', $this->sort_tanggal === 'asc' ? 'asc' : 'desc')
             ->paginate(10);
 
+        if ($this->filter_produk) {
+            $grandTotal = \App\Models\DetailPenjualan::whereHas('dataPenjualan', function($q) {
+                    $q->where('total_penjualan', '>', 0)
+                      ->when($this->search, fn($sq) => $sq->where('tanggal', 'like', '%' . $this->search . '%'));
+                })
+                ->where('id_produk', $this->filter_produk)
+                ->sum('penjualan');
+                
+            $grandTotalHarga = \App\Models\DetailPenjualan::join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
+                ->whereHas('dataPenjualan', function($q) {
+                    $q->where('total_penjualan', '>', 0)
+                      ->when($this->search, fn($sq) => $sq->where('tanggal', 'like', '%' . $this->search . '%'));
+                })
+                ->where('detail_penjualan.id_produk', $this->filter_produk)
+                ->sum(\Illuminate\Support\Facades\DB::raw('detail_penjualan.penjualan * produk.harga'));
+        } else {
+            $grandTotal = (clone $baseQuery)->sum('total_penjualan');
+            
+            $grandTotalHarga = \App\Models\DetailPenjualan::join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
+                ->join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
+                ->where('data_penjualan.total_penjualan', '>', 0)
+                ->when($this->search, fn($sq) => $sq->where('data_penjualan.tanggal', 'like', '%' . $this->search . '%'))
+                ->sum(\Illuminate\Support\Facades\DB::raw('detail_penjualan.penjualan * produk.harga'));
+        }
+
         $pelanggans = \App\Models\Pelanggan::orderBy('nama_pelanggan')->get();
 
         return view('livewire.admin.data-penjualan-management', [
             'records' => $records,
             'pelanggans' => $pelanggans,
+            'grandTotal' => $grandTotal,
+            'grandTotalHarga' => $grandTotalHarga,
         ]);
     }
 }
