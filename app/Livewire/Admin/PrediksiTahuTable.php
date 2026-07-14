@@ -23,6 +23,9 @@ class PrediksiTahuTable extends Component
     #[Reactive]
     public $end_date;
 
+    #[Reactive]
+    public $filter_produk;
+
     public $sort_tanggal = 'desc';
     public $perPage = 10;
 
@@ -40,10 +43,15 @@ class PrediksiTahuTable extends Component
     public function render()
     {
         // Get paginated daily records
-        $query = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->whereBetween('tanggal', [$this->start_date, $this->end_date])
-            ->groupBy('tanggal')
-            ->orderBy('tanggal', $this->sort_tanggal === 'asc' ? 'asc' : 'desc');
+        $query = DataPenjualan::selectRaw('data_penjualan.tanggal, SUM(detail_penjualan.penjualan) as total_penjualan, MAX(data_penjualan.id_data_penjualan) as last_id')
+            ->join('detail_penjualan', 'data_penjualan.id_data_penjualan', '=', 'detail_penjualan.id_data_penjualan')
+            ->whereBetween('data_penjualan.tanggal', [$this->start_date, $this->end_date])
+            ->groupBy('data_penjualan.tanggal')
+            ->orderBy('data_penjualan.tanggal', $this->sort_tanggal === 'asc' ? 'asc' : 'desc');
+            
+        if ($this->filter_produk) {
+            $query->where('detail_penjualan.id_produk', $this->filter_produk);
+        }
 
         if ($this->perPage == 0) {
             $records = $query->paginate(999999);
@@ -55,12 +63,17 @@ class PrediksiTahuTable extends Component
         $lastIds = $records->pluck('last_id');
         $predictions = HasilPrediksi::whereIn('id_data_penjualan', $lastIds)->get()->keyBy('id_data_penjualan');
         
-        $allRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
-            ->whereBetween('tanggal', [$this->start_date, $this->end_date])
-            ->groupBy('tanggal')
-            ->orderBy('tanggal', 'asc')
-            ->get()
-            ->toArray();
+        $allRecordsQuery = DataPenjualan::selectRaw('data_penjualan.tanggal, SUM(detail_penjualan.penjualan) as total_penjualan')
+            ->join('detail_penjualan', 'data_penjualan.id_data_penjualan', '=', 'detail_penjualan.id_data_penjualan')
+            ->whereBetween('data_penjualan.tanggal', [$this->start_date, $this->end_date])
+            ->groupBy('data_penjualan.tanggal')
+            ->orderBy('data_penjualan.tanggal', 'asc');
+            
+        if ($this->filter_produk) {
+            $allRecordsQuery->where('detail_penjualan.id_produk', $this->filter_produk);
+        }
+        
+        $allRecords = $allRecordsQuery->get()->toArray();
 
         // Prepare details
         foreach($records as $record) {

@@ -15,6 +15,7 @@ class PrediksiTahu extends Component
 
     public $start_date;
     public $end_date;
+    public $filter_produk = '';
 
     public function mount()
     {
@@ -33,7 +34,7 @@ class PrediksiTahu extends Component
 
         \App\Models\HasilPrediksi::truncate();
         $wmaService = new WeightedMovingAverage();
-        $wmaService->generatePrediksiTahu($this->start_date, $this->end_date);
+        $wmaService->generatePrediksiTahu($this->start_date, $this->end_date, $this->filter_produk ?: null);
 
         session()->flash('success', 'Kalkulasi prediksi WMA berhasil dijalankan!');
 
@@ -51,10 +52,16 @@ class PrediksiTahu extends Component
             $nextDate = $endDateObj->copy()->addDay();
             $nextHariStr = $nextDate->format('d M Y');
 
-            $dbRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan')
-                ->whereBetween('tanggal', [$this->start_date, $this->end_date])
-                ->groupBy('tanggal')
-                ->pluck('total_penjualan', 'tanggal');
+            $dbRecordsQuery = DataPenjualan::selectRaw('data_penjualan.tanggal, SUM(detail_penjualan.penjualan) as total_penjualan')
+                ->join('detail_penjualan', 'data_penjualan.id_data_penjualan', '=', 'detail_penjualan.id_data_penjualan')
+                ->whereBetween('data_penjualan.tanggal', [$this->start_date, $this->end_date])
+                ->groupBy('data_penjualan.tanggal');
+                
+            if ($this->filter_produk) {
+                $dbRecordsQuery->where('detail_penjualan.id_produk', $this->filter_produk);
+            }
+            
+            $dbRecords = $dbRecordsQuery->pluck('total_penjualan', 'tanggal');
 
             $ascRecords = [];
             $curr = $startDateObj->copy();
@@ -97,12 +104,15 @@ class PrediksiTahu extends Component
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
         ];
 
+        $products = \App\Models\Produk::orderBy('nama_produk')->get();
+
         return view('livewire.admin.prediksi-tahu', [
             'nextPrediction' => $nextPrediction,
             'avgMAD' => $avgMAD,
             'avgMSE' => $avgMSE,
             'avgMAPE' => $avgMAPE,
             'bulanOptions' => $bulanOptions,
+            'products' => $products,
         ]);
     }
 }

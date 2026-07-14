@@ -68,16 +68,22 @@ class WeightedMovingAverage
         return round(($this->calculateMAD($xt, $st) / $xt) * 100, 2);
     }
 
-    public function generatePrediksiTahu($startDate, $endDate)
+    public function generatePrediksiTahu($startDate, $endDate, $id_produk = null)
     {
         $offset = 3;
 
         // Ambil data harian berdasarkan rentang waktu yang dipilih
-        $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->whereBetween('tanggal', [$startDate, $endDate])
-            ->groupBy('tanggal')
-            ->orderBy('tanggal', 'asc')
-            ->get();
+        $query = DataPenjualan::selectRaw('data_penjualan.tanggal, SUM(detail_penjualan.penjualan) as total_penjualan, MAX(data_penjualan.id_data_penjualan) as last_id')
+            ->join('detail_penjualan', 'data_penjualan.id_data_penjualan', '=', 'detail_penjualan.id_data_penjualan')
+            ->whereBetween('data_penjualan.tanggal', [$startDate, $endDate])
+            ->groupBy('data_penjualan.tanggal')
+            ->orderBy('data_penjualan.tanggal', 'asc');
+            
+        if ($id_produk) {
+            $query->where('detail_penjualan.id_produk', $id_produk);
+        }
+        
+        $dailyRecords = $query->get();
 
         $dailyDataArray = $dailyRecords->toArray();
 

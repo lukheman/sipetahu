@@ -59,15 +59,24 @@
     <div class="modern-card mb-4">
         <h6 class="mb-3">Filter Rentang Waktu Perhitungan</h6>
         <div class="row g-3 align-items-end">
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label class="form-label text-muted fw-semibold">Produk (Opsional)</label>
+                <select wire:model="filter_produk" class="form-select" style="background-color: var(--bg-light); border-radius: 8px;">
+                    <option value="">-- Semua Produk --</option>
+                    @foreach($products as $product)
+                        <option value="{{ $product->id_produk }}">{{ $product->nama_produk }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label text-muted fw-semibold">Tanggal Mulai</label>
                 <input type="date" wire:model="start_date" class="form-control" style="background-color: var(--bg-light); border-radius: 8px;">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label text-muted fw-semibold">Tanggal Akhir</label>
                 <input type="date" wire:model="end_date" class="form-control" style="background-color: var(--bg-light); border-radius: 8px;">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <x-button wire:click="kalkulasiWMA" variant="primary" class="w-100" wire:loading.attr="disabled">
                     <span wire:loading.remove wire:target="kalkulasiWMA">
                         <i class="fas fa-calculator me-2"></i>Hitung Prediksi (WMA)
@@ -80,5 +89,5 @@
         </div>
     </div>
 
-    <livewire:admin.prediksi-tahu-table :nextPrediction="$nextPrediction" :start_date="$start_date" :end_date="$end_date" />
+    <livewire:admin.prediksi-tahu-table :nextPrediction="$nextPrediction" :start_date="$start_date" :end_date="$end_date" :filter_produk="$filter_produk" />
 </div>
