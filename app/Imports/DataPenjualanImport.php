@@ -43,22 +43,12 @@ class DataPenjualanImport implements ToCollection
                 $id_pelanggan = $dist ? $dist->id_pelanggan : null;
             }
 
-            $record = DataPenjualan::firstOrCreate(
-                ['tanggal' => $tanggal],
-                [
-                    'jenis_pembeli' => $jenis_pembeli,
-                    'id_pelanggan' => $id_pelanggan,
-                    'total_penjualan' => 0,
-                ]
-            );
-
-            // Update if empty
-            if ($record->jenis_pembeli === 'langsung' && $jenis_pembeli === 'pelanggan') {
-                $record->update([
-                    'jenis_pembeli' => $jenis_pembeli,
-                    'id_pelanggan' => $id_pelanggan,
-                ]);
-            }
+            $record = DataPenjualan::create([
+                'tanggal' => $tanggal,
+                'jenis_pembeli' => $jenis_pembeli,
+                'id_pelanggan' => $id_pelanggan,
+                'total_penjualan' => 0,
+            ]);
 
             $nama_produk = $this->getVal($rowArray, $columnMap, 'nama_produk');
             if ($nama_produk) {
@@ -66,16 +56,12 @@ class DataPenjualanImport implements ToCollection
                 if ($product) {
                     $penjualan = $this->toInt($this->getVal($rowArray, $columnMap, 'penjualan'));
 
-                    $record->detailPenjualans()->updateOrCreate(
-                        ['id_produk' => $product->id_produk],
-                        [
-                            'penjualan' => $penjualan,
-                        ]
-                    );
-
-                    $record->update([
-                        'total_penjualan' => $record->detailPenjualans()->sum('penjualan'),
+                    $record->detailPenjualans()->create([
+                        'id_produk' => $product->id_produk,
+                        'penjualan' => $penjualan,
                     ]);
+                    $record->update(['total_penjualan' => $record->detailPenjualans()->sum('penjualan')]);
+                    $this->importedCount++;
                 }
             }
 

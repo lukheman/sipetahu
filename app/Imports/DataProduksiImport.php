@@ -33,15 +33,10 @@ class DataProduksiImport implements ToCollection
                 continue;
             }
 
-            $record = DataPenjualan::firstOrCreate(
-                ['tanggal' => $tanggal],
-                [
-                    'jenis_pembeli' => 'langsung',
-                    'id_pelanggan' => null,
-                    'total_produksi' => 0,
-                    'total_penjualan' => 0,
-                ]
-            );
+            $record = \App\Models\DataProduksi::create([
+                'tanggal' => $tanggal,
+                'total_produksi' => 0,
+            ]);
 
             $nama_produk = $this->getVal($rowArray, $columnMap, 'nama_produk');
             if ($nama_produk) {
@@ -49,16 +44,13 @@ class DataProduksiImport implements ToCollection
                 if ($product) {
                     $produksi = $this->toInt($this->getVal($rowArray, $columnMap, 'produksi'));
 
-                    $record->detailPenjualans()->updateOrCreate(
-                        ['id_produk' => $product->id_produk],
-                        [
-                            'produksi' => $produksi,
-                            'penjualan' => 0,
-                        ]
-                    );
+                    $record->detailProduksis()->create([
+                        'id_produk' => $product->id_produk,
+                        'produksi' => $produksi,
+                    ]);
 
                     $record->update([
-                        'total_produksi' => $record->detailPenjualans()->sum('produksi'),
+                        'total_produksi' => $record->detailProduksis()->sum('produksi'),
                     ]);
                 }
             }
