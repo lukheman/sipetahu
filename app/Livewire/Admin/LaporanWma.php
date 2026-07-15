@@ -12,24 +12,38 @@ use Barryvdh\DomPDF\Facade\Pdf;
 #[Title('Laporan Prediksi WMA')]
 class LaporanWma extends Component
 {
+    public $start_date;
+    public $end_date;
+
     public function mount()
     {
         if (auth()->user()->role !== Role::PEMILIK) {
             abort(403, 'Akses ditolak. Halaman ini hanya untuk Pemilik.');
         }
+
+        $firstData = \App\Models\DataPenjualan::orderBy('tanggal', 'asc')->first();
+        $lastData = \App\Models\DataPenjualan::orderBy('tanggal', 'desc')->first();
+
+        $this->start_date = $firstData ? $firstData->tanggal : now()->subMonths(3)->startOfMonth()->format('Y-m-d');
+        $this->end_date = $lastData ? $lastData->tanggal : now()->endOfMonth()->format('Y-m-d');
     }
 
     public function exportPdf()
     {
-        $dailyRecords = DataPenjualan::selectRaw('tanggal, SUM(total_penjualan) as total_penjualan, MAX(id_data_penjualan) as last_id')
-            ->groupBy('tanggal')
-            ->orderBy('tanggal', 'asc')
-            ->get();
+        $dailyRecordsQuery = DataPenjualan::selectRaw('data_penjualan.tanggal, SUM(detail_penjualan.penjualan) as total_penjualan, MAX(data_penjualan.id_data_penjualan) as last_id')
+            ->join('detail_penjualan', 'data_penjualan.id_data_penjualan', '=', 'detail_penjualan.id_data_penjualan')
+            ->whereBetween('data_penjualan.tanggal', [$this->start_date, $this->end_date])
+            ->groupBy('data_penjualan.tanggal')
+            ->orderBy('data_penjualan.tanggal', 'asc');
+            
+        $dailyRecords = $dailyRecordsQuery->get();
             
         $predictions = HasilPrediksi::all()->keyBy('id_data_penjualan');
         
         foreach($dailyRecords as $record) {
             $record->hasilPrediksi = $predictions->get($record->last_id);
+            $record->tahu_besar = \App\Models\DetailPenjualan::whereHas('dataPenjualan', fn($q) => $q->where('tanggal', $record->tanggal))->where('id_produk', 1)->sum('penjualan');
+            $record->tahu_kecil = \App\Models\DetailPenjualan::whereHas('dataPenjualan', fn($q) => $q->where('tanggal', $record->tanggal))->where('id_produk', 2)->sum('penjualan');
         }
 
         $avgMAD = HasilPrediksi::has('dataPenjualan')->avg('mad') ?? 0;

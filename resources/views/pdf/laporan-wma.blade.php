@@ -105,6 +105,8 @@
             <tr>
                 <th>Tanggal</th>
                 <th>Aktual (Xt)</th>
+                <th>Tahu Besar</th>
+                <th>Tahu Kecil</th>
                 <th>Prediksi (WMA)</th>
                 <th>Error</th>
                 <th>MAD</th>
@@ -117,6 +119,8 @@
                 <tr>
                     <td>{{ \Carbon\Carbon::parse($record->tanggal)->translatedFormat('d F Y') }}</td>
                     <td style="font-weight: bold;">{{ number_format($record->total_penjualan, 2, ',', '.') }}</td>
+                    <td>{{ number_format($record->tahu_besar, 0, ',', '.') }}</td>
+                    <td>{{ number_format($record->tahu_kecil, 0, ',', '.') }}</td>
                     <td>
                         @if($record->hasilPrediksi)
                             {{ number_format($record->hasilPrediksi->wma, 2, ',', '.') }}
@@ -137,7 +141,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7">Belum ada data penjualan Tahu.</td>
+                    <td colspan="9">Belum ada data penjualan Tahu.</td>
                 </tr>
             @endforelse
         </tbody>

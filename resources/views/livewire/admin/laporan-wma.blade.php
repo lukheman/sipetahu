@@ -47,5 +47,5 @@
     </div>
 
     <!-- Data Table -->
-    <livewire:admin.prediksi-tahu-table />
+    <livewire:admin.prediksi-tahu-table :start_date="$start_date" :end_date="$end_date" />
 </div>
