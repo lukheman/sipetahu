@@ -43,7 +43,13 @@ class PrediksiTahuTable extends Component
     public function render()
     {
         // Get paginated daily records
-        $query = DataPenjualan::selectRaw('data_penjualan.tanggal, SUM(detail_penjualan.penjualan) as total_penjualan, MAX(data_penjualan.id_data_penjualan) as last_id')
+        $query = DataPenjualan::selectRaw("
+                data_penjualan.tanggal, 
+                SUM(detail_penjualan.penjualan) as total_penjualan, 
+                SUM(CASE WHEN detail_penjualan.id_produk = 1 THEN detail_penjualan.penjualan ELSE 0 END) as tahu_besar,
+                SUM(CASE WHEN detail_penjualan.id_produk = 2 THEN detail_penjualan.penjualan ELSE 0 END) as tahu_kecil,
+                MAX(data_penjualan.id_data_penjualan) as last_id
+            ")
             ->join('detail_penjualan', 'data_penjualan.id_data_penjualan', '=', 'detail_penjualan.id_data_penjualan')
             ->whereBetween('data_penjualan.tanggal', [$this->start_date, $this->end_date])
             ->groupBy('data_penjualan.tanggal')

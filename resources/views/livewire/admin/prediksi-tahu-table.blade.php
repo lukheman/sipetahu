@@ -26,6 +26,8 @@
                 <tr>
                     <th>Tanggal</th>
                     <th>Aktual (Xt)</th>
+                    <th>Tahu Besar</th>
+                    <th>Tahu Kecil</th>
                     <th>Prediksi (WMA)</th>
                     <th>Error</th>
                     <th>MAD</th>
@@ -38,6 +40,8 @@
                     <tr style="background-color: var(--hover-bg);">
                         <td class="fw-semibold text-primary">{{ $nextPrediction['tanggal'] }}</td>
                         <td class="text-muted fst-italic">Belum ada data</td>
+                        <td class="text-muted">-</td>
+                        <td class="text-muted">-</td>
                         <td>
                             <span class="badge bg-warning text-dark px-2 py-1 fs-6 shadow-sm">{{ number_format($nextPrediction['wma'], 2, ',', '.') }}</span>
                             @if(!empty($nextPrediction['detail_wma']))
@@ -58,6 +62,8 @@
                         <td class="fw-bold" style="color: var(--primary-color);">
                             {{ number_format($record->total_penjualan, 2, ',', '.') }}
                         </td>
+                        <td>{{ number_format($record->tahu_besar, 0, ',', '.') }}</td>
+                        <td>{{ number_format($record->tahu_kecil, 0, ',', '.') }}</td>
                         <td>
                             @if($record->hasilPrediksi)
                                 <span class="badge bg-warning text-dark px-2 py-1 fs-6">{{ number_format($record->hasilPrediksi->wma, 2, ',', '.') }}</span>
@@ -85,13 +91,15 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">Belum ada data penjualan Tahu.</td>
+                        <td colspan="9" class="text-center py-4 text-muted">Belum ada data penjualan Tahu.</td>
                     </tr>
                 @endforelse
                 @if ($nextPrediction && $records->onLastPage() && $sort_tanggal === 'asc')
                     <tr style="background-color: var(--hover-bg);">
                         <td class="fw-semibold text-primary">{{ $nextPrediction['tanggal'] }}</td>
                         <td class="text-muted fst-italic">Belum ada data</td>
+                        <td class="text-muted">-</td>
+                        <td class="text-muted">-</td>
                         <td>
                             <span class="badge bg-warning text-dark px-2 py-1 fs-6 shadow-sm">{{ number_format($nextPrediction['wma'], 2, ',', '.') }}</span>
                             @if(!empty($nextPrediction['detail_wma']))
