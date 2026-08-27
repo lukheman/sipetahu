@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LogoutController extends Controller
 {
@@ -12,9 +13,8 @@ class LogoutController extends Controller
      */
     public function __invoke(Request $request)
     {
-        \Illuminate\Support\Facades\Auth::guard('web')->logout();
-        \Illuminate\Support\Facades\Auth::guard('pemilik')->logout();
-        \Illuminate\Support\Facades\Auth::guard('pelanggan')->logout();
+        Auth::guard('web')->logout();
+        Auth::guard('pemilik')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

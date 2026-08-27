@@ -19,24 +19,20 @@ class TemplatePenjualanExport implements FromArray, WithHeadings
     {
         return [
             'Tanggal',
-            'Jenis Pembeli',
-            'Pelanggan',
             'Nama Produk',
-            'Penjualan'
+            'Penjualan',
         ];
     }
 
     public function array(): array
     {
         $rows = [];
-        
+
         foreach ($this->products as $product) {
             $rows[] = [
                 '2025-01-01',
-                'Langsung',
-                '',
                 $product->nama_produk,
-                450
+                450,
             ];
         }
 

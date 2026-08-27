@@ -2,23 +2,29 @@
 
 namespace App\Livewire\Admin;
 
+use App\Exports\DataPenjualanExport;
+use App\Exports\TemplatePenjualanExport;
+use App\Imports\DataPenjualanImport;
 use App\Models\DataPenjualan;
+use App\Models\DetailPenjualan;
+use App\Models\HasilPrediksi;
 use App\Models\Produk;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\DataPenjualanImport;
-use App\Exports\DataPenjualanExport;
 
 #[Title('Manajemen Penjualan')]
 class DataPenjualanManagement extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithFileUploads, WithPagination;
 
     public $file_import;
+
     public bool $showImportModal = false;
 
     #[Url(as: 'q')]
@@ -33,13 +39,15 @@ class DataPenjualanManagement extends Component
     // Form fields
     public string $tanggal = '';
 
-    public ?int $id_pelanggan = null;
     public array $penjualan_details = [];
 
     // State
     public ?int $editingId = null;
+
     public bool $showModal = false;
+
     public bool $showDeleteModal = false;
+
     public ?int $deletingId = null;
 
     public array $bulanOptions = [
@@ -66,7 +74,7 @@ class DataPenjualanManagement extends Component
     protected function initializeDetails(): void
     {
         $this->penjualan_details = [
-            ['id_produk' => '', 'jumlah' => 0]
+            ['id_produk' => '', 'jumlah' => 0],
         ];
     }
 
@@ -85,7 +93,6 @@ class DataPenjualanManagement extends Component
     {
         return [
             'tanggal' => ['required', 'date'],
-            'id_pelanggan' => ['nullable', 'exists:pelanggan,id_pelanggan'],
             'penjualan_details.*.id_produk' => ['required', 'exists:produk,id_produk'],
             'penjualan_details.*.jumlah' => ['required', 'integer', 'min:0'],
         ];
@@ -129,10 +136,9 @@ class DataPenjualanManagement extends Component
         $record = DataPenjualan::with('detailPenjualans')->findOrFail($id);
         $this->editingId = $id;
         $this->tanggal = $record->tanggal;
-        $this->id_pelanggan = $record->id_pelanggan;
 
         $this->penjualan_details = [];
-        
+
         foreach ($record->detailPenjualans as $detail) {
             $this->penjualan_details[] = [
                 'id_produk' => $detail->id_produk,
@@ -140,7 +146,9 @@ class DataPenjualanManagement extends Component
             ];
         }
 
-        if (empty($this->penjualan_details)) $this->penjualan_details = [['id_produk' => '', 'jumlah' => 0]];
+        if (empty($this->penjualan_details)) {
+            $this->penjualan_details = [['id_produk' => '', 'jumlah' => 0]];
+        }
 
         $this->showModal = true;
     }
@@ -148,12 +156,15 @@ class DataPenjualanManagement extends Component
     public function save(): void
     {
         $this->penjualan_details = array_values(array_filter($this->penjualan_details, function ($detail) {
-            return !empty($detail['id_produk']);
+            return ! empty($detail['id_produk']);
         }));
 
         if (empty($this->penjualan_details)) {
             $this->addError('tanggal', 'Silakan pilih produk sebelum menyimpan data.');
-            if (empty($this->penjualan_details)) $this->penjualan_details = [['id_produk' => '', 'jumlah' => 0]];
+            if (empty($this->penjualan_details)) {
+                $this->penjualan_details = [['id_produk' => '', 'jumlah' => 0]];
+            }
+
             return;
         }
 
@@ -162,10 +173,12 @@ class DataPenjualanManagement extends Component
         $total_penjualan = collect($validated['penjualan_details'] ?? [])->sum('jumlah');
 
         $merged_details = [];
-        if (!empty($validated['penjualan_details'])) {
+        if (! empty($validated['penjualan_details'])) {
             foreach ($validated['penjualan_details'] as $p) {
                 $pid = $p['id_produk'];
-                if (!isset($merged_details[$pid])) $merged_details[$pid] = ['penjualan' => 0];
+                if (! isset($merged_details[$pid])) {
+                    $merged_details[$pid] = ['penjualan' => 0];
+                }
                 $merged_details[$pid]['penjualan'] += $p['jumlah'];
             }
         }
@@ -174,7 +187,6 @@ class DataPenjualanManagement extends Component
             $record = DataPenjualan::findOrFail($this->editingId);
             $record->update([
                 'tanggal' => $validated['tanggal'],
-                'id_pelanggan' => $validated['id_pelanggan'],
                 'total_penjualan' => $total_penjualan,
             ]);
 
@@ -190,7 +202,6 @@ class DataPenjualanManagement extends Component
         } else {
             $record = DataPenjualan::create([
                 'tanggal' => $validated['tanggal'],
-                'id_pelanggan' => $validated['id_pelanggan'],
                 'total_penjualan' => $total_penjualan,
             ]);
 
@@ -246,11 +257,11 @@ class DataPenjualanManagement extends Component
 
     public function deleteAll(): void
     {
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        \App\Models\HasilPrediksi::truncate();
-        \App\Models\DetailPenjualan::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        HasilPrediksi::truncate();
+        DetailPenjualan::truncate();
         DataPenjualan::truncate();
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         session()->flash('success', 'Semua data penjualan berhasil dihapus beserta seluruh riwayat prediksinya.');
         $this->showDeleteAllModal = false;
@@ -266,7 +277,6 @@ class DataPenjualanManagement extends Component
     {
         $this->tanggal = now()->format('Y-m-d');
 
-        $this->id_pelanggan = null;
         $this->initializeDetails();
         $this->editingId = null;
     }
@@ -287,7 +297,7 @@ class DataPenjualanManagement extends Component
 
     public function downloadTemplate()
     {
-        return Excel::download(new \App\Exports\TemplatePenjualanExport, 'template_import_penjualan.xlsx');
+        return Excel::download(new TemplatePenjualanExport, 'template_import_penjualan.xlsx');
     }
 
     public function importData()
@@ -298,7 +308,7 @@ class DataPenjualanManagement extends Component
             'file_import.required' => 'Pilih file terlebih dahulu.',
             'file_import.file' => 'Upload harus berupa file.',
             'file_import.mimes' => 'Format file harus xlsx, xls, atau csv.',
-            'file_import.max' => 'Ukuran file maksimal 5MB.'
+            'file_import.max' => 'Ukuran file maksimal 5MB.',
         ]);
 
         try {
@@ -312,7 +322,7 @@ class DataPenjualanManagement extends Component
             }
             $this->closeImportModal();
         } catch (\Exception $e) {
-            $this->addError('file_import', 'Gagal mengimpor data: ' . $e->getMessage());
+            $this->addError('file_import', 'Gagal mengimpor data: '.$e->getMessage());
         }
     }
 
@@ -321,16 +331,16 @@ class DataPenjualanManagement extends Component
         return Excel::download(new DataPenjualanExport($this->search, $this->filter_produk, $this->sort_tanggal), 'data_penjualan.xlsx');
     }
 
-    #[\Livewire\Attributes\Computed]
+    #[Computed]
     public function products()
     {
         return Produk::orderBy('nama_produk')->get();
     }
 
-    #[\Livewire\Attributes\Computed]
+    #[Computed]
     public function monthlyRecords()
     {
-        $details = \App\Models\DetailPenjualan::join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
+        $details = DetailPenjualan::join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
             ->join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
             ->selectRaw('YEAR(data_penjualan.tanggal) as tahun, MONTH(data_penjualan.tanggal) as bulan, produk.nama_produk, SUM(detail_penjualan.penjualan) as total_penjualan, SUM(detail_penjualan.penjualan * produk.harga) as total_harga')
             ->groupBy('tahun', 'bulan', 'produk.nama_produk')
@@ -340,13 +350,13 @@ class DataPenjualanManagement extends Component
             ->get();
 
         $grouped = [];
-        foreach($details as $d) {
-            $key = $d->tahun . '-' . str_pad($d->bulan, 2, '0', STR_PAD_LEFT);
-            if(!isset($grouped[$key])) {
+        foreach ($details as $d) {
+            $key = $d->tahun.'-'.str_pad($d->bulan, 2, '0', STR_PAD_LEFT);
+            if (! isset($grouped[$key])) {
                 $grouped[$key] = [
                     'tahun' => $d->tahun,
                     'bulan' => $d->bulan,
-                    'produk' => []
+                    'produk' => [],
                 ];
             }
             $grouped[$key]['produk'][] = [
@@ -363,48 +373,44 @@ class DataPenjualanManagement extends Component
     {
         $baseQuery = DataPenjualan::query()
             ->where('total_penjualan', '>', 0)
-            ->when($this->search, fn($q) => $q->where('tanggal', 'like', '%' . $this->search . '%'));
+            ->when($this->search, fn ($q) => $q->where('tanggal', 'like', '%'.$this->search.'%'));
 
         $records = (clone $baseQuery)
-            ->with(['pelanggan', 'detailPenjualans.produk'])
+            ->with(['detailPenjualans.produk'])
             ->when(
                 $this->filter_produk,
-                fn($q) => 
-                $q->whereHas('detailPenjualans', fn($dq) => $dq->where('id_produk', $this->filter_produk))
+                fn ($q) => $q->whereHas('detailPenjualans', fn ($dq) => $dq->where('id_produk', $this->filter_produk))
             )
             ->orderBy('tanggal', $this->sort_tanggal === 'asc' ? 'asc' : 'desc')
             ->paginate(10);
 
         if ($this->filter_produk) {
-            $grandTotal = \App\Models\DetailPenjualan::whereHas('dataPenjualan', function($q) {
-                    $q->where('total_penjualan', '>', 0)
-                      ->when($this->search, fn($sq) => $sq->where('tanggal', 'like', '%' . $this->search . '%'));
-                })
+            $grandTotal = DetailPenjualan::whereHas('dataPenjualan', function ($q) {
+                $q->where('total_penjualan', '>', 0)
+                    ->when($this->search, fn ($sq) => $sq->where('tanggal', 'like', '%'.$this->search.'%'));
+            })
                 ->where('id_produk', $this->filter_produk)
                 ->sum('penjualan');
-                
-            $grandTotalHarga = \App\Models\DetailPenjualan::join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
-                ->whereHas('dataPenjualan', function($q) {
+
+            $grandTotalHarga = DetailPenjualan::join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
+                ->whereHas('dataPenjualan', function ($q) {
                     $q->where('total_penjualan', '>', 0)
-                      ->when($this->search, fn($sq) => $sq->where('tanggal', 'like', '%' . $this->search . '%'));
+                        ->when($this->search, fn ($sq) => $sq->where('tanggal', 'like', '%'.$this->search.'%'));
                 })
                 ->where('detail_penjualan.id_produk', $this->filter_produk)
-                ->sum(\Illuminate\Support\Facades\DB::raw('detail_penjualan.penjualan * produk.harga'));
+                ->sum(DB::raw('detail_penjualan.penjualan * produk.harga'));
         } else {
             $grandTotal = (clone $baseQuery)->sum('total_penjualan');
-            
-            $grandTotalHarga = \App\Models\DetailPenjualan::join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
+
+            $grandTotalHarga = DetailPenjualan::join('produk', 'detail_penjualan.id_produk', '=', 'produk.id_produk')
                 ->join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
                 ->where('data_penjualan.total_penjualan', '>', 0)
-                ->when($this->search, fn($sq) => $sq->where('data_penjualan.tanggal', 'like', '%' . $this->search . '%'))
-                ->sum(\Illuminate\Support\Facades\DB::raw('detail_penjualan.penjualan * produk.harga'));
+                ->when($this->search, fn ($sq) => $sq->where('data_penjualan.tanggal', 'like', '%'.$this->search.'%'))
+                ->sum(DB::raw('detail_penjualan.penjualan * produk.harga'));
         }
-
-        $pelanggans = \App\Models\Pelanggan::orderBy('nama_pelanggan')->get();
 
         return view('livewire.admin.data-penjualan-management', [
             'records' => $records,
-            'pelanggans' => $pelanggans,
             'grandTotal' => $grandTotal,
             'grandTotalHarga' => $grandTotalHarga,
         ]);

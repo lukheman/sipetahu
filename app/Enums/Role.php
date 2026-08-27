@@ -6,7 +6,6 @@ enum Role: string
 {
     case ADMIN = 'admin';
     case PEMILIK = 'pemilik';
-    case PELANGGAN = 'pelanggan';
 
     public static function values(): array
     {
@@ -21,7 +20,6 @@ enum Role: string
         return match ($this) {
             self::ADMIN => 'Administrator',
             self::PEMILIK => 'Pemilik',
-            self::PELANGGAN => 'Pelanggan',
         };
     }
 
@@ -33,7 +31,6 @@ enum Role: string
         return match ($this) {
             self::ADMIN => 'danger',
             self::PEMILIK => 'primary',
-            self::PELANGGAN => 'success',
         };
     }
 
@@ -45,8 +42,6 @@ enum Role: string
         return match ($this) {
             self::ADMIN => 'fas fa-user-shield',
             self::PEMILIK => 'fas fa-user-tie',
-            self::PELANGGAN => 'fas fa-user',
         };
     }
-
 }

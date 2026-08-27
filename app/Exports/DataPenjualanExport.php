@@ -10,7 +10,9 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
 {
     public string $search;
+
     public string $filter_produk;
+
     public string $sort_tanggal;
 
     public function __construct(string $search = '', string $filter_produk = '', string $sort_tanggal = 'desc')
@@ -22,12 +24,12 @@ class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
 
     public function collection()
     {
-        $query = DetailPenjualan::with(['dataPenjualan.pelanggan', 'produk'])
+        $query = DetailPenjualan::with(['dataPenjualan', 'produk'])
             ->join('data_penjualan', 'detail_penjualan.id_data_penjualan', '=', 'data_penjualan.id_data_penjualan')
             ->select('detail_penjualan.*');
 
         if ($this->search) {
-            $query->where('data_penjualan.tanggal', 'like', '%' . $this->search . '%');
+            $query->where('data_penjualan.tanggal', 'like', '%'.$this->search.'%');
         }
 
         if ($this->filter_produk) {
@@ -43,21 +45,17 @@ class DataPenjualanExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             'Tanggal',
-            'Jenis Pembeli',
-            'Pelanggan',
             'Nama Produk',
-            'Penjualan'
+            'Penjualan',
         ];
     }
 
     public function map($detail): array
     {
         $dataPenjualan = $detail->dataPenjualan;
-        
+
         return [
             $dataPenjualan ? $dataPenjualan->tanggal : '',
-            $dataPenjualan ? ucfirst($dataPenjualan->jenis_pembeli) : '',
-            ($dataPenjualan && $dataPenjualan->pelanggan) ? $dataPenjualan->pelanggan->nama_pelanggan : '-',
             $detail->produk ? $detail->produk->nama_produk : '',
             $detail->penjualan,
         ];

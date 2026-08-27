@@ -1,6 +1,6 @@
 <div>
     {{-- Page Header --}}
-    <x-page-header title="Data Penjualan" subtitle="Kelola data penjualan tahu ke pelanggan">
+    <x-page-header title="Data Penjualan" subtitle="Kelola data penjualan tahu">
         <x-slot:actions>
             <x-button variant="danger" icon="fas fa-trash-alt" wire:click="confirmDeleteAll" title="Hapus Semua Data" class="me-auto">
                 Hapus Semua
@@ -77,7 +77,6 @@
             <x-slot:head>
                 <tr>
                     <th>Tanggal</th>
-                    <th>Pembeli</th>
                     <th>Nama Produk</th>
                     <th>Penjualan</th>
                     <th>Total Harga</th>
@@ -98,13 +97,6 @@
                             <tr wire:key="record-{{ $record->id_data_penjualan }}">
                                 <td class="align-middle">
                                     {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
-                                </td>
-                                <td class="align-middle">
-                                    @if($record->id_pelanggan)
-                                        <span class="badge bg-primary">Pelanggan: {{ $record->pelanggan?->nama_pelanggan }}</span>
-                                    @else
-                                        <span class="badge bg-secondary">Langsung</span>
-                                    @endif
                                 </td>
                                 <td class="align-middle text-muted">-</td>
                                 <td class="align-middle text-muted">-</td>
@@ -128,13 +120,6 @@
                                     <td class="align-middle border-end">
                                         {{ \Carbon\Carbon::parse($record->tanggal)->format('d M Y') }}
                                     </td>
-                                    <td class="align-middle border-end">
-                                        @if($record->id_pelanggan)
-                                            <span class="badge bg-primary">Pelanggan: {{ $record->pelanggan?->nama_pelanggan }}</span>
-                                        @else
-                                            <span class="badge bg-secondary">Langsung</span>
-                                        @endif
-                                    </td>
 
                                     <td class="align-middle">{{ $detail->produk->nama_produk ?? '-' }}</td>
                                     <td class="align-middle border-end">{{ number_format($detail->penjualan, 0, ',', '.') }}</td>
@@ -157,7 +142,7 @@
                         @endif
                     @empty
                         <tr>
-                            <td colspan="6" class="p-0 border-0">
+                            <td colspan="5" class="p-0 border-0">
                                 <x-empty-state
                                     size="sm"
                                     icon="fas fa-box-open"
@@ -171,7 +156,7 @@
                 @if($records->total() > 0)
                 <tfoot>
                     <tr class="fw-bold" style="background-color: var(--bg-tertiary);">
-                        <td colspan="3" class="text-end align-middle">Total Keseluruhan (Sesuai Filter):</td>
+                        <td colspan="2" class="text-end align-middle">Total Keseluruhan (Sesuai Filter):</td>
                         <td class="align-middle text-primary">{{ number_format($grandTotal, 0, ',', '.') }} Potong</td>
                         <td class="align-middle text-primary">Rp {{ number_format($grandTotalHarga, 0, ',', '.') }}</td>
                         <td></td>
@@ -267,15 +252,6 @@
                                     <h6 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Detail Penjualan</h6>
                                 </div>
                                 <div class="card-body p-3">
-                                    <div class="mb-4 bg-light p-3 rounded border">
-                                        <x-select
-                                            label="Pilih Pelanggan (Opsional, kosongkan jika pembeli langsung)"
-                                            wire:model="id_pelanggan"
-                                            :options="$pelanggans->pluck('nama_pelanggan', 'id_pelanggan')->toArray()"
-                                            placeholder="-- Pembeli Langsung --"
-                                        />
-                                    </div>
-
                                     @foreach($penjualan_details as $index => $detail)
                                         <div class="row align-items-center">
                                             <div class="col-md-6 mb-2 mb-md-0">

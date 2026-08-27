@@ -3,10 +3,12 @@
 namespace App\Imports;
 
 use App\Models\DataPenjualan;
+use App\Models\Produk;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class DataPenjualanImport implements ToCollection
 {
@@ -22,37 +24,25 @@ class DataPenjualanImport implements ToCollection
         $headerRow = $rows->first()->toArray();
         $columnMap = $this->buildColumnMap($headerRow);
 
-        $products = \App\Models\Produk::all();
+        $products = Produk::all();
 
         // Process data rows (skip header)
         foreach ($rows->skip(1) as $row) {
             $rowArray = $row->toArray();
 
             $tanggal = $this->parseDate($this->getVal($rowArray, $columnMap, 'tanggal'));
-            if (!$tanggal) {
+            if (! $tanggal) {
                 continue;
-            }
-
-            $jenis_pembeli = $this->getVal($rowArray, $columnMap, 'jenis_pembeli');
-            $jenis_pembeli = $jenis_pembeli ? strtolower(trim($jenis_pembeli)) : 'langsung';
-
-            $pelanggan_name = $this->getVal($rowArray, $columnMap, 'pelanggan');
-            $id_pelanggan = null;
-            if ($jenis_pembeli === 'pelanggan' && $pelanggan_name) {
-                $dist = \App\Models\Pelanggan::where('nama_pelanggan', 'like', "%{$pelanggan_name}%")->first();
-                $id_pelanggan = $dist ? $dist->id_pelanggan : null;
             }
 
             $record = DataPenjualan::create([
                 'tanggal' => $tanggal,
-                'jenis_pembeli' => $jenis_pembeli,
-                'id_pelanggan' => $id_pelanggan,
                 'total_penjualan' => 0,
             ]);
 
             $nama_produk = $this->getVal($rowArray, $columnMap, 'nama_produk');
             if ($nama_produk) {
-                $product = \App\Models\Produk::where('nama_produk', 'like', "%{$nama_produk}%")->first();
+                $product = Produk::where('nama_produk', 'like', "%{$nama_produk}%")->first();
                 if ($product) {
                     $penjualan = $this->toInt($this->getVal($rowArray, $columnMap, 'penjualan'));
 
@@ -96,7 +86,7 @@ class DataPenjualanImport implements ToCollection
 
     private function getVal(array $row, array $columnMap, string $field): mixed
     {
-        if (!isset($columnMap[$field])) {
+        if (! isset($columnMap[$field])) {
             return null;
         }
 
@@ -112,7 +102,7 @@ class DataPenjualanImport implements ToCollection
         // Excel serial number (dates are stored as numbers > 1000)
         if (is_numeric($value) && (float) $value > 1000) {
             try {
-                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((int) $value)->format('Y-m-d');
+                return Date::excelToDateTimeObject((int) $value)->format('Y-m-d');
             } catch (\Exception $e) {
                 return null;
             }

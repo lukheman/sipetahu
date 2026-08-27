@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Admin;
+use App\Models\Pemilik;
+
 return [
 
     /*
@@ -44,10 +47,6 @@ return [
             'driver' => 'session',
             'provider' => 'pemilik',
         ],
-        'pelanggan' => [
-            'driver' => 'session',
-            'provider' => 'pelanggan',
-        ],
     ],
 
     /*
@@ -70,15 +69,11 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Admin::class),
+            'model' => env('AUTH_MODEL', Admin::class),
         ],
         'pemilik' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Pemilik::class,
-        ],
-        'pelanggan' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Pelanggan::class,
+            'model' => Pemilik::class,
         ],
     ],
 

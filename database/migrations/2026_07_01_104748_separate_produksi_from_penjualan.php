@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -43,7 +43,7 @@ return new class extends Migration
                 ->where('id_data_penjualan', $penj->id_data_penjualan)
                 ->where('produksi', '>', 0)
                 ->get();
-            
+
             foreach ($details as $det) {
                 DB::table('detail_produksi')->insert([
                     'id_data_produksi' => $id_data_produksi,
@@ -59,7 +59,7 @@ return new class extends Migration
         Schema::table('data_penjualan', function (Blueprint $table) {
             $table->dropColumn('total_produksi');
         });
-        
+
         Schema::table('detail_penjualan', function (Blueprint $table) {
             $table->dropColumn('produksi');
         });
@@ -84,8 +84,6 @@ return new class extends Migration
         foreach ($produksiRecords as $prod) {
             $id_data_penjualan = DB::table('data_penjualan')->insertGetId([
                 'tanggal' => $prod->tanggal,
-                'jenis_pembeli' => 'langsung',
-                'id_pelanggan' => null,
                 'total_produksi' => $prod->total_produksi,
                 'total_penjualan' => 0,
                 'created_at' => $prod->created_at,
@@ -95,7 +93,7 @@ return new class extends Migration
             $details = DB::table('detail_produksi')
                 ->where('id_data_produksi', $prod->id_data_produksi)
                 ->get();
-            
+
             foreach ($details as $det) {
                 DB::table('detail_penjualan')->insert([
                     'id_data_penjualan' => $id_data_penjualan,
